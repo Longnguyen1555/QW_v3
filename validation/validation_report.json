@@ -1,0 +1,124 @@
+{
+  "runtime_note": "Independent Python mirror; MATLAB/Octave unavailable in build container.",
+  "profiles": [
+    {
+      "profile": "quick",
+      "converged": true,
+      "iterations": 64,
+      "E0_meV": -104.64215281849242,
+      "E1_meV": -23.036664832642202,
+      "DeltaE01_meV": 81.60548798585022,
+      "EF_meV": 105.60641443475005,
+      "charge_rel_error": 3.52e-15,
+      "norm_max_error": 7.216449660063518e-15,
+      "total_peak_meV": 45.25
+    },
+    {
+      "profile": "standard",
+      "converged": true,
+      "iterations": 64,
+      "E0_meV": -104.59976217413676,
+      "E1_meV": -23.041540432083526,
+      "DeltaE01_meV": 81.55822174205323,
+      "EF_meV": 105.63145069407253,
+      "charge_rel_error": 3.04e-15,
+      "norm_max_error": 1.9984014443252818e-14,
+      "total_peak_meV": 45.44000000000004
+    }
+  ],
+  "standard": {
+    "energies_meV": [
+      -104.59976217413676,
+      -23.041540432083526,
+      105.08006037592885,
+      308.5324369184218
+    ],
+    "EF_meV": 105.63145069407253,
+    "deltaE01_meV": 81.55822174205323,
+    "dipole01_nm": 2.593638764108125,
+    "qd_inv_nm": 0.23044965111251833,
+    "total_metrics": {
+      "peak_x_meV": 45.44000000000004,
+      "fwhm_meV": 1.6717105791522884,
+      "hwhm_meV": 0.8358552895761442
+    },
+    "components": {
+      "optical": {
+        "1": {
+          "emission": {
+            "peak_x_meV": 117.9200000000001,
+            "fwhm_meV": 1.6526226620954434,
+            "hwhm_meV": 0.8263113310477217
+          },
+          "absorption": {
+            "peak_x_meV": 45.44000000000004,
+            "fwhm_meV": 1.670158666680949,
+            "hwhm_meV": 0.8350793333404745
+          }
+        },
+        "2": {
+          "emission": {
+            "peak_x_meV": 59.00000000000005,
+            "fwhm_meV": 0.8898576435050858,
+            "hwhm_meV": 0.4449288217525429
+          },
+          "absorption": {
+            "peak_x_meV": 22.76000000000002,
+            "fwhm_meV": 0.8991896407332773,
+            "hwhm_meV": 0.44959482036663867
+          }
+        },
+        "3": {
+          "emission": {
+            "peak_x_meV": 39.44000000000003,
+            "fwhm_meV": 0.635846646513479,
+            "hwhm_meV": 0.3179233232567395
+          },
+          "absorption": {
+            "peak_x_meV": 15.200000000000012,
+            "fwhm_meV": 0.6424975800113488,
+            "hwhm_meV": 0.3212487900056744
+          }
+        }
+      },
+      "piezoelectric": {
+        "1": {
+          "emission": {
+            "peak_x_meV": 83.12000000000008,
+            "fwhm_meV": 2.05441628488965,
+            "hwhm_meV": 1.027208142444825
+          },
+          "absorption": {
+            "peak_x_meV": 80.12000000000008,
+            "fwhm_meV": 1.9642244689004429,
+            "hwhm_meV": 0.9821122344502214
+          }
+        },
+        "2": {
+          "emission": {
+            "peak_x_meV": 41.720000000000034,
+            "fwhm_meV": 1.064625276756684,
+            "hwhm_meV": 0.532312638378342
+          },
+          "absorption": {
+            "peak_x_meV": 40.040000000000035,
+            "fwhm_meV": 1.0739549470026672,
+            "hwhm_meV": 0.5369774735013336
+          }
+        },
+        "3": {
+          "emission": {
+            "peak_x_meV": 27.920000000000023,
+            "fwhm_meV": 0.7024383616000187,
+            "hwhm_meV": 0.35121918080000936
+          },
+          "absorption": {
+            "peak_x_meV": 26.72000000000002,
+            "fwhm_meV": 0.6962660493267865,
+            "hwhm_meV": 0.34813302466339324
+          }
+        }
+      }
+    }
+  }
+}

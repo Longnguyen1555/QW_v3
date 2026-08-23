@@ -35,8 +35,14 @@ function out = solve_schrodinger_poisson(cfg)
         Psi = zeros(numel(z), n_states);
         Psi(2:end-1, :) = Psi_in;
 
-        EF = solve_fermi_level(Nd_sheet, E, cfg);
-        Ni = subband_sheet_populations(EF, E, cfg);
+        if Nd_sheet > 0
+            EF = solve_fermi_level(Nd_sheet, E, cfg);
+            Ni = subband_sheet_populations(EF, E, cfg);
+        else
+            EF = NaN;
+            Ni = zeros(n_states,1);
+        end
+        
         n_z = electron_density_from_subbands(Psi, Ni);
         VH_new = solve_poisson_dirichlet(z, Nd_z, n_z, cfg);
 
@@ -47,7 +53,7 @@ function out = solve_schrodinger_poisson(cfg)
         end
     
 
-        if dVH_meV <= cfg.sp.minimum_scale_meV && dEF_meV <= cfg.sp.tol_EF_meV
+        if dVH_meV <= cfg.sp.tol_VH_meV && dEF_meV <= cfg.sp.tol_EF_meV
             converged = true;
             VH_old = VH_new;
             break;

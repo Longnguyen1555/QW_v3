@@ -42,8 +42,9 @@ cfg.fields.E_kVcm         = 0.0;
 cfg.temperature_K         = 300.0;
 
 % Transition indices are MATLAB 1-based subband indices.
+cfg.oap.model             = 'direct_q_integral';
 cfg.oap.transitions       = [1 2];
-cfg.oap.photon_orders     = [1 2 3];
+cfg.oap.photon_orders     = [1 2];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
 
 % Photon-energy scan

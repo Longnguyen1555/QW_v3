@@ -43,9 +43,9 @@ function cfg = default_config()
 
     %% Schrodinger-Poisson controls
     cfg.sp.max_iter = 300;
-    cfg.sp.mix = 0.20;
+    cfg.sp.mix = 0.50;
     cfg.sp.tol_potential_rel = 1.0e-4;
-    cfg.sp.tol_EF_meV = 1.0e-6;
+    cfg.sp.tol_EF_meV = 1.0e-3;
     cfg.sp.minimum_scale_meV = 1.0e-3;
     cfg.sp.poisson_boundary = 'dirichlet_zero';
 
@@ -90,7 +90,7 @@ function cfg = default_config()
     cfg.oap.active_thickness_nm = 10.0;
 
     % Plot normalization does not alter saved raw spectra.
-    cfg.oap.plot_normalization = 'global_max'; % 'none' or 'global_max'
+    cfg.oap.plot_normalization = 'none'; % 'none' or 'global_max'
 
     % Truncated analytical-series controls
     cfg.oap.series.s_max = 8;

@@ -5,7 +5,7 @@ function fig = plot_electronic_structure(sp, cfg)
     hold on;
 
     plot(sp.z_nm, sp.Vconf_meV, '--', 'LineWidth', 1.4);
-    plot(sp.z_nm, sp.Veff_meV, 'k-', 'LineWidth', 1.8);
+    plot(sp.z_nm, sp.EF_meV, 'k-', 'LineWidth', 1.8);
 
     density_scale = 0.10 * (max(sp.Veff_meV)-min(sp.Veff_meV));
     if density_scale <= 0
@@ -24,7 +24,7 @@ function fig = plot_electronic_structure(sp, cfg)
     xlabel('z (nm)');
     ylabel('Energy (meV)');
     title('Self-consistent anharmonic quantum well');
-    legend({'U_A(z)','U_{eff}(z)','|\psi_i|^2 + E_i'}, ...
+    legend({'U_A(z)','EF(z)','|\psi_i|^2 + E_i'}, ...
            'Location','best');
     grid on; box on;
 end

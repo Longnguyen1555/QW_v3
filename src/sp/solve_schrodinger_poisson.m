@@ -19,12 +19,12 @@ function out = solve_schrodinger_poisson(cfg)
     width = cfg.doping.width_nm * c.nm;
     Nd_z = delta_doping_profile(z, Nd_sheet, width);
 
-    n_states = min(cfg.structure.n_states, numel(z_in)-2);
+    n_states = 12;
     VH_old = zeros(size(z));
     EF_old = NaN;
     converged = false;
-    potential_error = Inf;
-    EF_error = Inf;
+    dEF_meV = Inf;
+    
 
     for it = 1:cfg.sp.max_iter
         H = build_sp_hamiltonian(z_in, dz, Vconf(2:end-1), ...
@@ -40,23 +40,20 @@ function out = solve_schrodinger_poisson(cfg)
         n_z = electron_density_from_subbands(Psi, Ni);
         VH_new = solve_poisson_dirichlet(z, Nd_z, n_z, cfg);
 
-        VH = cfg.sp.mix .* VH_new + (1.0-cfg.sp.mix) .* VH_old;
+        dVH_meV = max(abs(VH_new - VH_old)) / c.meV;
 
-        scale = max(max(abs(VH)), cfg.sp.minimum_scale_meV*c.meV);
-        potential_error = max(abs(VH - VH_old)) / scale;
-
-        if isfinite(EF_old)
-            EF_error = abs(EF - EF_old) / c.meV;
+        if isfinite(EF_old) && isfinite(EF)
+            dEF_meV = abs(EF - EF_old) / c.meV;
         end
+    
 
-        if potential_error <= cfg.sp.tol_potential_rel && ...
-                EF_error <= cfg.sp.tol_EF_meV
+        if dVH_meV <= cfg.sp.minimum_scale_meV && dEF_meV <= cfg.sp.tol_EF_meV
             converged = true;
-            VH_old = VH;
+            VH_old = VH_new;
             break;
         end
-
-        VH_old = VH;
+        VH_old = cfg.sp.mix .* VH_new + (1.0-cfg.sp.mix) .* VH_old;
+       
         EF_old = EF;
     end
 
@@ -101,6 +98,6 @@ function out = solve_schrodinger_poisson(cfg)
     out.charge_integral_m2 = trapz(z, n_z);
     out.iterations = it;
     out.converged = converged;
-    out.potential_error = potential_error;
-    out.EF_error_meV = EF_error;
+    out.VH_error_meV = dVH_meV;
+    out.EF_error_meV = dEF_meV;
 end

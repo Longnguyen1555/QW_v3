@@ -10,7 +10,6 @@ function spectrum = compute_moap_pdf_taylor_bessel(sp, td, cfg)
     e    = c.e;
     kBT  = c.kB * cfg.temperature_K;
     eps0 = c.eps0;
-    cfg.oap.normalization_area_m2 = 1.0;
     me = cfg.material.mstar_rel * c.m0;
 
     kappa0   = cfg.material.eps_static;
@@ -81,7 +80,7 @@ function spectrum = compute_moap_pdf_taylor_bessel(sp, td, cfg)
         % Piezoelectric prefactor -- Eq. (27)
         % ================================================================
        
-        P0_PE = E0^4 * e^4 * me^2 * cfg.material.piezo_kappa2 * kBT * S * sqrt(kappa0) / (256.0 * pi^3 * hbar^7 * kappa0 * eps0 * Omega);
+        P0_PE = E0^4 * e^4 * me^2 * cfg.material.piezo_kappa2 * kBT * S * sqrt(kappa0) / (256.0 * pi^3 * hbar^7 * kappa0 * eps0 * Omega^2);
 
         spectrum.meta.P0_optical(iE) = P0_LO;
         spectrum.meta.P0_piezoelectric(iE) = P0_PE;
@@ -271,7 +270,7 @@ function Tval = compute_T_taylor_bessel_pdf(eps_alpha_J, EF_J, D_J, ell, qd, cfg
             % Eq. (32) multiplied by Lambda
             LambdaJ = (hbar^2 * qd^2 / (2.0 * me)) * (hbar^2 * qd^2 / (2.0 * me * absD))^(s-ell) * LambdaKsum;
 
-            term = (-1)^(s + v - 1) * (v + 1) * exp(logLambda) * qd_power * LambdaJ;
+            term = (-1)^(s + v - 1) * (s + 1) * exp(logLambda) * qd_power * LambdaJ;
 
             Tval = Tval + term;
         end

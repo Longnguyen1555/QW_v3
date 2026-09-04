@@ -46,7 +46,7 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     % ================================================================
     % Axis
     % ================================================================
-    xlabel('Photon energy \hbar\Omega (meV)');
+    xlabel('Photon energy (meV)');
 
     if strcmpi(cfg.oap.plot_normalization, 'global_max')
 

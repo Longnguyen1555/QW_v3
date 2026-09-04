@@ -34,17 +34,17 @@ cfg = apply_numerical_profile(cfg, 'standard');
 % Main physical parameters
 cfg.structure.Lz_nm       = 5.0;
 cfg.structure.alpha       = 0.30;
-cfg.structure.U0_meV      = 228.0;
+cfg.structure.U0_meV      = 220.0;
 cfg.doping.Nd_sheet_cm2   = 1.0e13;
 cfg.doping.width_nm       = 2.0;
 cfg.fields.B_T            = 10.0;
 cfg.fields.E_kVcm         = 0.0;
-cfg.temperature_K         = 300.0;
+cfg.temperature_K         = 90.0;
 
 % Transition indices are MATLAB 1-based subband indices.
 cfg.oap.model             = 'direct_q_integral';
 cfg.oap.transitions       = [1 2];
-cfg.oap.photon_orders     = [1 2];
+cfg.oap.photon_orders     = [1 2 3];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
 
 % Photon-energy scan

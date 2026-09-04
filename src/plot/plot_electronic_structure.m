@@ -39,7 +39,7 @@ function fig = plot_electronic_structure(sp, cfg)
     end
 
     xlabel('z (nm)');
-    ylabel('Energy (meV)');
+    ylabel('Photon energy (meV)');
 
     title('Self-consistent electronic structure');
 

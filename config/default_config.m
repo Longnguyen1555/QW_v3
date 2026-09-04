@@ -10,7 +10,7 @@ function cfg = default_config()
     %% Material: GaAs
     cfg.material.name = 'GaAs';
     cfg.material.mstar_rel = 0.067;
-    cfg.material.eps_static = 12.58;
+    cfg.material.eps_static = 13.18;
     cfg.material.eps_high = 10.89;
     cfg.material.LO_phonon_meV = 36.25;
     cfg.material.sound_speed_mps = 5.22e3;
@@ -18,24 +18,24 @@ function cfg = default_config()
     cfg.material.piezo_kappa2 = 0.006;
     cfg.material.e14_Cm2 = 0.16;
 
-    cfg.material.eps_poisson = 12.58;
+    cfg.material.eps_poisson = 13.18;
 
     %% Quantum-well confinement
     cfg.structure.potential_model = 'manning_sech';
 
     cfg.structure.U0_meV = 220.0;
-    cfg.structure.Lz_nm = 28.0;
+    cfg.structure.Lz_nm = 12.0;
     cfg.structure.manning_prefactor = 6.0;
 
     cfg.structure.alpha = 0.30;
-    cfg.structure.domain_nm = 180.0;
+    cfg.structure.domain_nm = 60.0;
     cfg.structure.auto_domain = false;
     cfg.structure.domain_factor = 3.0;
     cfg.structure.Nz = 1502;
     cfg.structure.n_states = 6;
 
     %% Delta doping
-    cfg.doping.Nd_sheet_cm2 = 1.0e-13;
+    cfg.doping.Nd_sheet_cm2 = 1.0e13;
     cfg.doping.width_nm = 2.0;
 
     %% Static fields
@@ -44,7 +44,7 @@ function cfg = default_config()
     cfg.fields.kx_inv_m = 0.0;
 
     %% Temperature
-    cfg.temperature_K = 300.0;
+    cfg.temperature_K = 90.0;
 
     %% Schrodinger-Poisson controls
     cfg.sp.max_outer = 100;
@@ -56,15 +56,15 @@ function cfg = default_config()
 
     %% Laser
     cfg.laser.E0_kVcm = 4.5;
-    cfg.laser.a0_mode = 'constant';
+    cfg.laser.a0_mode = 'constant'; %'dynamic'
     cfg.laser.a0_nm = 7.5;
 
     %% OAP model
-    cfg.oap.model = 'direct_t';
+    cfg.oap.model = 'direct_t_integral';
     cfg.oap.transitions = [1 2];
-    cfg.oap.photon_orders = [1 2];
+    cfg.oap.photon_orders = [1 2 3];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-    cfg.oap.photon_energy_meV = 2.0:0.10:160.0;
+    cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
 

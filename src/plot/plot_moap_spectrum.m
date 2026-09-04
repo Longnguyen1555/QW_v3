@@ -31,7 +31,7 @@ function fig = plot_moap_spectrum(spectrum, cfg, tag, mechanism)
 
     plot( E, spectrum.mechanism.(mk).total_plot, '-', 'LineWidth', 2.0);
 
-    xlabel('Photon energy \hbar\Omega (meV)');
+    xlabel('Photon energy (meV)');
 
     if strcmpi(cfg.oap.plot_normalization, 'global_max')
 

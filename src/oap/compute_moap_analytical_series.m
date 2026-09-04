@@ -19,10 +19,11 @@ function spectrum = compute_moap_analytical_series(sp, td, cfg)
     S = (cfg.structure.Lz_nm*c.nm)^2;
     V = S*(cfg.oap.active_thickness_nm*c.nm);
     mstar = cfg.material.mstar_rel*c.m0;
-    Omega = Ephot / c.hbar;
+    a0 = cfg.laser.a0_nm*c.nm;
 
-    a0 = c.e*E0 ./ (mstar*Omega.^2);
-    
+    populations = electron_populations_for_oap(sp, cfg);
+    pop_norm = populations/max(sum(populations), realmin);
+
     N0 = 1/expm1(cfg.material.LO_phonon_meV*c.meV/...
                  (c.kB*cfg.temperature_K));
 
@@ -39,21 +40,6 @@ function spectrum = compute_moap_analytical_series(sp, td, cfg)
 
     for it = 1:numel(td)
         i = td(it).initial;
-        if cfg.oap.series.enforce_fermi_condition
-            if ~(sp.E_J(i) > sp.EF_J)
-                error([ ...
-                    'HƯỚNG DẪN Taylor-Fermi requires E_initial > EF.\n', ...
-                    'Transition %d -> %d:\n', ...
-                    'E_initial = %.12f meV\n', ...
-                    'EF        = %.12f meV\n', ...
-                    'E_initial-EF = %.12f meV'], ...
-                    td(it).initial, ...
-                    td(it).final, ...
-                    sp.E_J(i)/c.meV, ...
-                    sp.EF_J/c.meV, ...
-                    (sp.E_J(i)-sp.EF_J)/c.meV);
-            end
-        end
         Q = td(it).Q_half_inv_m;
         for order = cfg.oap.photon_orders
             if order > 2
@@ -66,19 +52,22 @@ function spectrum = compute_moap_analytical_series(sp, td, cfg)
                     sign_ph = -1; bose = N0; pname = 'absorption_raw';
                 end
 
-                hw0 = cfg.material.LO_phonon_meV*c.meV;
+                Dopt = td(it).deltaE_J + sign_ph*...
+                       cfg.material.LO_phonon_meV*c.meV - order*Ephot;
 
                 for im = 1:numel(cfg.oap.mechanisms)
                     mechanism = cfg.oap.mechanisms{im};
                     if strcmpi(mechanism,'optical')
                         Cmech = Copt;
                         Jtype = 'optical';
-                        D = td(it).deltaE_J + sign_ph*hw0 - order*Ephot;
+                        D = Dopt;
                         mk = 'optical';
                     else
                         Cmech = Cpiezo;
                         Jtype = 'piezoelectric';
-                        D = td(it).deltaE_J + sign_ph*hw0 - order*Ephot;
+                        qeff = qd;
+                        hweff = c.hbar*cfg.material.sound_speed_mps*qeff;
+                        D = td(it).deltaE_J + sign_ph*hweff - order*Ephot;
                         mk = 'piezoelectric';
                     end
 
@@ -103,7 +92,7 @@ function spectrum = compute_moap_analytical_series(sp, td, cfg)
                         order_factor = a0^2/16;
                     end
 
-                    P = Cmech*common*Q*bose*...
+                    P = Cmech*common*Q*pop_norm(i)*bose*...
                         order_factor.*series_sum;
                     P(P<0) = 0;
 

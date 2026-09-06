@@ -37,7 +37,7 @@ cfg.structure.alpha       = 0.30;
 cfg.structure.U0_meV      = 220.0;
 cfg.doping.Nd_sheet_cm2   = 1.0e13;
 cfg.doping.width_nm       = 2.0;
-cfg.fields.B_T            = 10.0;
+cfg.fields.B_T            = 0.0;
 cfg.fields.E_kVcm         = 0.0;
 cfg.temperature_K         = 90.0;
 
@@ -48,7 +48,7 @@ cfg.oap.photon_orders     = [1 2 3];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
 
 % Photon-energy scan
-cfg.oap.photon_energy_meV = 2.0:0.10:160.0;
+cfg.oap.photon_energy_meV = 0.01:0.01:100.0;
 
 % Sweep used by 'sweep_spectra' and 'linewidth_sweep'
 % Supported names: 'B_T', 'T_K', 'Lz_nm', 'E_kVcm',

@@ -60,7 +60,7 @@ function cfg = default_config()
     cfg.laser.a0_nm = 7.5;
 
     %% OAP model
-    cfg.oap.model = 'direct_t_integral';
+    cfg.oap.model = 'direct_q_integral';
     cfg.oap.transitions = [1 2];
     cfg.oap.photon_orders = [1 2 3];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};

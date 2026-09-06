@@ -21,15 +21,16 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                      cfg.oap.Nqperp) / c.nm;
     wperp = trapezoid_weights(qperp);
 
-    [QP, QZ] = meshgrid(qperp, td(1).qz_inv_m);
-    [WP, WZ] = meshgrid(wperp, trapezoid_weights(td(1).qz_inv_m));
+   [QP, QZ] = meshgrid(qperp, td(1).qz_inv_m);
+    [WP, WZ] = meshgrid( ...
+        wperp, ...
+        trapezoid_weights(td(1).qz_inv_m));
 
     q = sqrt(QP.^2 + QZ.^2);
-    J2 = landau_form_factor_squared(QP, cfg);
 
     % Cylindrical integral:
     % int_{-inf}^{inf}dqz int_0^inf 2*pi*qperp*dqperp /(2*pi)^3
-    measure = (2.0/(2*pi)^2) .* QP .* WP .* WZ .* J2;
+    measure = (2.0/(2*pi)^2) .* QP .* WP .* WZ;
 
     populations = electron_populations_for_oap(sp, cfg);
     E0 = cfg.laser.E0_kVcm * 1.0e5;
@@ -73,9 +74,7 @@ function spectrum = compute_moap_direct(sp, td, cfg)
             I2grid = repmat(td(it).I2(:), 1, numel(qperp));
 
             base = measure .* C2V .* I2grid;
-            dipole2 = abs(td(it).dipole_m)^2;
-            Mrad2 = c.e^2*E0^2*dipole2/4.0;
-
+            
             transition_total = zeros(1,nE);
 
             for order = cfg.oap.photon_orders
@@ -93,8 +92,7 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                 shape_ab = broaden_binned_centers(Ephot, centers_ab, ...
                     w_ab, order, gamma);
 
-                energy_pref = pref_oap .* populations(i) .* Mrad2 .* ...
-                    (a0.^(2*order)) ./ (Ephot.^2);
+                energy_pref = pref_oap .* populations(i) .* (a0.^(2*order));
 
                 P_em = energy_pref .* shape_em;
                 P_ab = energy_pref .* shape_ab;

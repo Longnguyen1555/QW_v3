@@ -74,7 +74,7 @@ function cfg = default_config()
     cfg.oap.Nqz = 90;
     cfg.oap.Nqperp = 90;
 
-    cfg.oap.inplane_factor = 'landau';
+    cfg.oap.inplane_factor = 'none';
     cfg.oap.landau_initial = 0;
     cfg.oap.landau_final = 0;
     cfg.oap.thermal_cutoff_factor = 1.0;
@@ -86,7 +86,7 @@ function cfg = default_config()
     cfg.oap.fixed_ne_cm3 = 1.0e18;
     cfg.oap.active_thickness_nm = 10.0;
 
-    cfg.oap.plot_normalization = 'none';
+    cfg.oap.plot_normalization = 'global_max';
     cfg.oap.direct.RelTol = 1.0e-9;
     cfg.oap.direct.AbsTol = 0.0;
 

@@ -78,7 +78,8 @@ function out = solve_schrodinger_poisson(cfg)
     Efield = cfg.fields.E_kVcm*1e5;
     mstar = cfg.material.mstar_rel*c.m0;
     kx = cfg.fields.kx_inv_m;
-    Vmag = (c.hbar*kx + c.e*B.*z).^2/(2*mstar);
+    
+    Vmag = (c.e^2 * B^2 .* z.^2) ./ (2.0*mstar);
     Velec = -c.e*Efield.*z;
     Veff = Vconf + VH_old + Vmag + Velec;
 

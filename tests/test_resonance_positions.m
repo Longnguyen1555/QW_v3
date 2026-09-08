@@ -3,6 +3,8 @@ function test_resonance_positions()
 % (DeltaE +/- hbar*omega_LO)/ell within Lorentzian/grid tolerance.
 
     cfg = apply_numerical_profile(default_config(),'quick');
+    cfg.fields.E_kVcm = 0;
+    cfg.oap.broadening.mode = 'legacy_lorentzian';
     cfg.oap.mechanisms = {'optical'};
     cfg.oap.photon_orders = [1 2];
     sp = solve_schrodinger_poisson(cfg);

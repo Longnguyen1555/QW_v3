@@ -2,11 +2,10 @@ function spectrum = compute_moap_direct(sp, td, cfg)
 %COMPUTE_MOAP_DIRECT Direct q-space evaluation of the second-order model.
 %
 % This evaluates the continuum transition-probability integral corresponding
-% to the target paper's Eqs. (10), (13), (21), (22), and (24)-(26), with:
-%   - Dirac delta -> Lorentzian collision broadening;
-%   - cylindrical q integration;
-%   - Eq. (12) in-plane magnetic form factor;
-%   - q_perp in the laser-dressing factor (a0*q_perp)^(2*l).
+% to the target paper's Eqs. (10), (13), (21), (22), and (24)-(26), with
+% cylindrical q integration and q_perp in the laser-dressing factor
+% (a0*q_perp)^(2*l).  The direct binned delta-function representation is
+% retained separately from optional legacy Lorentzian broadening.
 %
 % Process convention:
 %   emission   : l*hOmega = DeltaE + hbar*omega_q, Bose factor N_q+1
@@ -53,6 +52,10 @@ function spectrum = compute_moap_direct(sp, td, cfg)
     spectrum.meta.qd_inv_nm = qd*c.nm;
     spectrum.meta.screening_ne_m3 = ne3d;
     spectrum.meta.qperp_inv_m = qperp;
+    spectrum.meta.broadening.mode = cfg.oap.broadening.mode;
+    spectrum.meta.broadening.gamma_optical_meV = cfg.oap.gamma_optical_meV;
+    spectrum.meta.broadening.gamma_piezo_meV = cfg.oap.gamma_piezo_meV;
+    spectrum.meta.linewidth_source = 'binned_raw';
 
     for im = 1:numel(cfg.oap.mechanisms)
         mechanism = cfg.oap.mechanisms{im};
@@ -67,6 +70,7 @@ function spectrum = compute_moap_direct(sp, td, cfg)
         end
 
         mechanism_total = zeros(1,nE);
+        mechanism_binned_total = zeros(1,nE);
 
         for it = 1:numel(td)
             i = td(it).initial;
@@ -87,16 +91,21 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                 centers_em = (deltaE + hw) ./ order;
                 centers_ab = (deltaE - hw) ./ order;
 
-                shape_em = broaden_binned_centers(Ephot, centers_em, ...
-                    w_em, order, gamma);
-                shape_ab = broaden_binned_centers(Ephot, centers_ab, ...
-                    w_ab, order, gamma);
+                [shape_em, binned_em] = broaden_binned_centers( ...
+                    Ephot, centers_em, w_em, order, gamma, ...
+                    cfg.oap.broadening.mode);
+                [shape_ab, binned_ab] = broaden_binned_centers( ...
+                    Ephot, centers_ab, w_ab, order, gamma, ...
+                    cfg.oap.broadening.mode);
 
                 energy_pref = pref_oap .* populations(i) .* (a0.^(2*order));
 
                 P_em = energy_pref .* shape_em;
                 P_ab = energy_pref .* shape_ab;
                 P_order = P_em + P_ab;
+                P_binned_em = energy_pref .* binned_em;
+                P_binned_ab = energy_pref .* binned_ab;
+                P_binned_order = P_binned_em + P_binned_ab;
 
                 order_key = sprintf('order_%d', order);
                 spectrum.mechanism.(mech_key).(order_key).emission_raw = ...
@@ -105,8 +114,15 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                     spectrum.mechanism.(mech_key).(order_key).absorption_raw + P_ab;
                 spectrum.mechanism.(mech_key).(order_key).total_raw = ...
                     spectrum.mechanism.(mech_key).(order_key).total_raw + P_order;
+                spectrum.mechanism.(mech_key).(order_key).emission_binned_raw = ...
+                    spectrum.mechanism.(mech_key).(order_key).emission_binned_raw + P_binned_em;
+                spectrum.mechanism.(mech_key).(order_key).absorption_binned_raw = ...
+                    spectrum.mechanism.(mech_key).(order_key).absorption_binned_raw + P_binned_ab;
+                spectrum.mechanism.(mech_key).(order_key).total_binned_raw = ...
+                    spectrum.mechanism.(mech_key).(order_key).total_binned_raw + P_binned_order;
 
                 transition_total = transition_total + P_order;
+                mechanism_binned_total = mechanism_binned_total + P_binned_order;
             end
 
             tr_key = sprintf('transition_%d_%d', td(it).initial, td(it).final);
@@ -115,7 +131,9 @@ function spectrum = compute_moap_direct(sp, td, cfg)
         end
 
         spectrum.mechanism.(mech_key).total_raw = mechanism_total;
+        spectrum.mechanism.(mech_key).total_binned_raw = mechanism_binned_total;
         spectrum.total_raw = spectrum.total_raw + mechanism_total;
+        spectrum.total_binned_raw = spectrum.total_binned_raw + mechanism_binned_total;
     end
 
     spectrum = normalize_spectrum_for_plot(spectrum, cfg);

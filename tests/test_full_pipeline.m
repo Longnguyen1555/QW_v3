@@ -4,6 +4,7 @@ function test_full_pipeline()
     cfg.output.save_csv = false;
     cfg.output.save_mat = false;
     cfg.run.task = 'single';
+    cfg.fields.E_kVcm = 0;
 
     sp = solve_schrodinger_poisson(cfg);
     td = compute_transition_data(sp,cfg);

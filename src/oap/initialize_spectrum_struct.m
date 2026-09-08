@@ -7,18 +7,24 @@ function spectrum = initialize_spectrum_struct(Ephot, cfg)
     spectrum.energy_J = Ephot;
     spectrum.energy_meV = Ephot/c.meV;
     spectrum.total_raw = zeros(1,nE);
+    % Binned q-space result before optional phenomenological broadening.
+    spectrum.total_binned_raw = zeros(1,nE);
     spectrum.meta = struct();
 
     all_mechanisms = {'optical','piezoelectric'};
     for im = 1:numel(all_mechanisms)
         mk = all_mechanisms{im};
         spectrum.mechanism.(mk).total_raw = zeros(1,nE);
+        spectrum.mechanism.(mk).total_binned_raw = zeros(1,nE);
         spectrum.mechanism.(mk).transitions = struct();
         for order = cfg.oap.photon_orders
             ok = sprintf('order_%d', order);
             spectrum.mechanism.(mk).(ok).emission_raw = zeros(1,nE);
             spectrum.mechanism.(mk).(ok).absorption_raw = zeros(1,nE);
             spectrum.mechanism.(mk).(ok).total_raw = zeros(1,nE);
+            spectrum.mechanism.(mk).(ok).emission_binned_raw = zeros(1,nE);
+            spectrum.mechanism.(mk).(ok).absorption_binned_raw = zeros(1,nE);
+            spectrum.mechanism.(mk).(ok).total_binned_raw = zeros(1,nE);
         end
     end
 end

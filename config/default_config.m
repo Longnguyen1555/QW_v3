@@ -79,6 +79,10 @@ function cfg = default_config()
     cfg.oap.landau_final = 0;
     cfg.oap.thermal_cutoff_factor = 1.0;
 
+    % Optional phenomenological display broadening.  These widths are used
+    % only when broadening.mode is 'legacy_lorentzian'; they are not a
+    % microscopic linewidth model.
+    cfg.oap.broadening.mode = 'none'; % 'none' or 'legacy_lorentzian'
     cfg.oap.gamma_optical_meV = 0.80;
     cfg.oap.gamma_piezo_meV = 0.60;
 

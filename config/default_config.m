@@ -56,15 +56,15 @@ function cfg = default_config()
 
     %% Laser
     cfg.laser.E0_kVcm = 4.5;
-    cfg.laser.a0_mode = 'constant'; %'dynamic'
+    cfg.laser.a0_mode = 'dynamic';
     cfg.laser.a0_nm = 7.5;
 
     %% OAP model
     cfg.oap.model = 'direct_q_integral';
     cfg.oap.transitions = [1 2];
-    cfg.oap.photon_orders = [1 2 3];
+    cfg.oap.photon_orders = [1 2];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-    cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
+    cfg.oap.photon_energy_meV = 2.0:0.010:100.0;
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
 
@@ -79,6 +79,7 @@ function cfg = default_config()
     cfg.oap.landau_final = 0;
     cfg.oap.thermal_cutoff_factor = 1.0;
 
+    % Used by broadened legacy/other models; ignored by direct_q_integral.
     cfg.oap.gamma_optical_meV = 0.80;
     cfg.oap.gamma_piezo_meV = 0.60;
 
@@ -89,11 +90,15 @@ function cfg = default_config()
     cfg.oap.plot_normalization = 'global_max';
     cfg.oap.direct.RelTol = 1.0e-9;
     cfg.oap.direct.AbsTol = 0.0;
+    cfg.oap.direct.energy_block_size = 2048;
 
     cfg.oap.series.s_max = 8;
     cfg.oap.series.eta_max = 5;
     cfg.oap.series.v_max = 20;
     cfg.oap.series.enforce_fermi_condition = true;
+    % Area S from sum_k -> S/(2*pi) int_0^Inf k dk.  Because the source
+    % electromagnetic prefactor is not dimensionally closed in SI, direct
+    % raw output is source-normalized rather than claimed as absolute W.
     cfg.oap.normalization_area_m2 = 1.0;
     cfg.oap.series.piezo_effective_q_mode = 'debye';
 

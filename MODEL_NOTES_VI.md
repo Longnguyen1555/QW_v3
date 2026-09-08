@@ -23,7 +23,7 @@ Sau khi hội tụ, `compute_transition_data` tính:
 
 - phonon quang / phonon áp điện;
 - phát xạ / hấp thụ phonon;
-- 1, 2, 3 photon.
+- 1, 2 photon.
 
 ## 2. Plot giống cách tổ chức bài [6]
 

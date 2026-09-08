@@ -7,7 +7,7 @@ Si delta-doped anharmonic GaAs quantum well with:
 - perpendicular electric field and in-plane magnetic field;
 - electron-LO-phonon scattering with Debye screening;
 - electron-piezoelectric-phonon scattering with Debye screening;
-- 1PA, 2PA and 3PA;
+- direct Eq. (2)/(18) contributions for 1PA and 2PA;
 - phonon emission and absorption separated;
 - spectra versus photon energy;
 - parameter sweeps versus B, T, Lz, E, doping, alpha or U0;
@@ -50,16 +50,17 @@ The results are saved in `results/`.
 
    `V |C_q^op|^2 =
       e^2 hbar omega_LO/(2 eps0)
-      (1/eps_inf - 1/eps_s) q^2/(q^2+qd^2)^2`
+      (1/eps_inf - 1/eps_s) q_perp^2/(q_perp^2+qd^2)^2`
 
 7. Piezoelectric coupling (screened)
 
    `V |C_q^pi|^2 =
       kappa^2 hbar e^2 s/(2 eps_s eps0)
-      q^3/(q^2+qd^2)^2`
+      q_perp^3/(q_perp^2+qd^2)^2`
 
-8. Lorentzian replacement of the Dirac delta and numerical cylindrical
-   q integration.
+8. Exact positive-`k_perp` Dirac root, recoil, Fermi-Dirac occupation,
+   and numerical cylindrical q integration.  No fixed Lorentzian is used
+   by `direct_q_integral`.
 
 ## Important modeling choice
 
@@ -67,10 +68,9 @@ The source draft contains copied Landau-level notation even though its
 Hamiltonian uses an in-plane magnetic field and solves the z-dependent
 states directly. The code therefore does not add a separate Landau
 energy ladder. It uses the computed subband energies and wavefunctions.
-The Eq. (12) Landau form factor is retained as an optional in-plane
-momentum factor because it is needed for article-[6]-style convergent
-multi-photon spectra. At B=0 it is automatically replaced by a thermal
-recoil cutoff.
+The direct Eq. (2)/(18) path does not add a Landau form factor or an extra
+dipole/radiation factor.  A legacy Landau helper remains in the repository
+only for other models.
 
 ## Absolute scale
 

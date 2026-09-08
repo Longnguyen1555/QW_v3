@@ -11,11 +11,12 @@
 | Dipole matrix `A_mn` | `src/oap/compute_transition_data.m` |
 | Form factor `I_mn(qz)` | `src/oap/compute_transition_data.m` |
 | Debye wave number `q_d` | `src/oap/debye_wavevector.m` |
-| Piezoelectric coupling, target Eq. (13) | `src/oap/phonon_coupling_density.m` |
-| Optical coupling, target Eq. (21) | `src/oap/phonon_coupling_density.m` |
-| Magnetic/Laguerre factor, target Eq. (12) | `src/oap/landau_form_factor_squared.m` |
-| Second-order q-space transition probability | `src/oap/compute_moap_direct.m` |
-| Dirac delta to Lorentzian | `src/oap/broaden_binned_centers.m` |
+| Optical screened coupling in Eq. (2) | `src/oap/phonon_coupling_density.m` |
+| Piezoelectric screened coupling in Eq. (18) | `src/oap/phonon_coupling_density.m` |
+| Optical/piezo Bose-weighted terms | `src/oap/direct_phonon_terms.m` |
+| Exact positive-k Dirac root and Fermi factor | `src/oap/direct_k_delta_weight.m` |
+| Direct Eq. (2)/(18) q-space integral | `src/oap/compute_moap_direct.m` |
+| Lorentzian broadening (not used by `direct_q_integral`) | `src/oap/broaden_binned_centers.m` |
 | Analytical Taylor-Bessel Eq. (5)/(7) | `src/oap/compute_moap_analytical_series.m` |
 | Peak position, FWHM and HWHM | `src/oap/profile_fwhm.m` |
 | Spectra versus B/T/L/E/Nd/alpha/U0 | `src/core/run_parameter_sweep.m` |

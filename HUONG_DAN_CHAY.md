@@ -64,7 +64,7 @@ cfg.sweep.values = [4.5 5.0 5.5];
 
 ```matlab
 cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-cfg.oap.photon_orders = [1 2 3];
+cfg.oap.photon_orders = [1 2];
 ```
 
 Có thể chọn riêng một cơ chế:

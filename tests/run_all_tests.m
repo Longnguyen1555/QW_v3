@@ -9,7 +9,8 @@ function run_all_tests()
 
     test_wavefunction_normalization();
     test_charge_neutrality();
-    test_resonance_positions();
+    test_direct_q_integral_physics();
+    test_analytical_series();
     test_full_pipeline();
 
     fprintf('ALL TESTS PASSED\n');

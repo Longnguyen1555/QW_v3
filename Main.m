@@ -5,7 +5,7 @@
 % The default run:
 %   1) solves the self-consistent Schrodinger-Poisson problem;
 %   2) computes optical-phonon and piezoelectric-phonon spectra;
-%   3) plots 1PA, 2PA, 3PA contributions;
+%   3) plots 1PA and 2PA contributions;
 %   4) saves MAT, CSV and PNG outputs in results/.
 %
 % Edit only the USER SETTINGS block below for normal use.
@@ -42,9 +42,9 @@ cfg.fields.E_kVcm         = 0.0;
 cfg.temperature_K         = 90.0;
 
 % Transition indices are MATLAB 1-based subband indices.
-cfg.oap.model             = 'direct_q_integral';
+cfg.oap.model             = 'analytical_series';
 cfg.oap.transitions       = [1 2];
-cfg.oap.photon_orders     = [1 2 3];
+cfg.oap.photon_orders     = [1 2];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
 
 % Photon-energy scan

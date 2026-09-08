@@ -6,15 +6,27 @@ function m = profile_fwhm(x, y)
     y(~isfinite(y)) = 0;
 
     [peak, idx] = max(y);
-    m = struct('peak',peak,'peak_x',NaN,'fwhm',NaN,'hwhm',NaN, ...
-               'left_x',NaN,'right_x',NaN);
+    m = struct( ...
+    'peak', peak, ...
+    'peak_x', NaN, ...
+    'fwhm', NaN, ...
+    'hwhm', NaN, ...
+    'left_x', NaN, ...
+    'right_x', NaN, ...
+    'half_max', NaN, ...
+    'is_boundary_peak', false);
 
     if isempty(idx) || peak <= 0
         return;
     end
 
     m.peak_x = x(idx);
+    if idx == 1 || idx == numel(y)
+        m.is_boundary_peak = true;
+        return;
+    end
     half = peak/2;
+    m.half_max = half;
 
     il = find(y(1:idx) <= half, 1, 'last');
     if isempty(il) || il == idx

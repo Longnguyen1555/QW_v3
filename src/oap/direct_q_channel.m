@@ -9,10 +9,30 @@ function value = direct_q_channel( ...
     kBT  = c.kB * cfg.temperature_K;
 
     E0 = cfg.laser.E0_kVcm * 1e5;
+    if Eph <= 0
+        error('Photon energy must be strictly positive.');
+    end
+
     Omega = Eph / hbar;
 
-    % Source definition
-    a0 = c.e * E0 / (me * Omega^2);
+    switch lower(cfg.laser.a0_mode)
+
+        case 'dynamic'
+
+            % Source definition:
+            % a0 = e E0 / (m Omega^2)
+            a0 = c.e * E0 / (me * Omega^2);
+
+        case 'constant'
+
+            % Diagnostic mode only.
+            a0 = cfg.laser.a0_nm * c.nm;
+
+        otherwise
+
+            error('Unknown laser.a0_mode: %s', ...
+                cfg.laser.a0_mode);
+    end
 
     hw0 = cfg.material.LO_phonon_meV * c.meV;
 

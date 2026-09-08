@@ -1,7 +1,7 @@
 B_T,Mechanism,PhotonOrder,Process,FWHM_meV,HWHM_meV
 5,optical,1,emission,NaN,NaN
 5,optical,1,absorption,NaN,NaN
-5,optical,2,emission,45.2148139650747,22.6074069825373
+5,optical,2,emission,NaN,NaN
 5,optical,2,absorption,NaN,NaN
 5,piezoelectric,1,emission,NaN,NaN
 5,piezoelectric,1,absorption,NaN,NaN
@@ -9,7 +9,7 @@ B_T,Mechanism,PhotonOrder,Process,FWHM_meV,HWHM_meV
 5,piezoelectric,2,absorption,NaN,NaN
 10,optical,1,emission,NaN,NaN
 10,optical,1,absorption,NaN,NaN
-10,optical,2,emission,45.4872580208434,22.7436290104217
+10,optical,2,emission,NaN,NaN
 10,optical,2,absorption,NaN,NaN
 10,piezoelectric,1,emission,NaN,NaN
 10,piezoelectric,1,absorption,NaN,NaN
@@ -17,7 +17,7 @@ B_T,Mechanism,PhotonOrder,Process,FWHM_meV,HWHM_meV
 10,piezoelectric,2,absorption,NaN,NaN
 15,optical,1,emission,NaN,NaN
 15,optical,1,absorption,NaN,NaN
-15,optical,2,emission,45.9309942579523,22.9654971289761
+15,optical,2,emission,NaN,NaN
 15,optical,2,absorption,NaN,NaN
 15,piezoelectric,1,emission,NaN,NaN
 15,piezoelectric,1,absorption,NaN,NaN

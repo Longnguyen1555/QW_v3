@@ -64,7 +64,7 @@ function cfg = default_config()
     cfg.oap.transitions = [1 2];
     cfg.oap.photon_orders = [1 2 3];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-    cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
+    cfg.oap.photon_energy_meV = 2.0:0.010:100.0;
     cfg.oap.population_mode = 'fermi_dirac';
     cfg.oap.include_pauli_blocking = false;
 
@@ -84,7 +84,7 @@ function cfg = default_config()
     cfg.oap.fixed_ne_cm3 = 1.0e18;
     cfg.oap.active_thickness_nm = 10.0;
 
-    cfg.oap.plot_normalization = 'global_max';
+    cfg.oap.plot_normalization = 'none';
     cfg.oap.direct.RelTol = 1.0e-9;
     cfg.oap.direct.AbsTol = 0.0;
 

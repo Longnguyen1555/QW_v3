@@ -1,69 +1,48 @@
 function spectrum = compute_moap_direct(sp, td, cfg)
-%COMPUTE_MOAP_DIRECT Direct q-space evaluation of the second-order model.
+%COMPUTE_MOAP_DIRECT
+% Direct q_perp integration following the calculation note.
 %
-% This evaluates the continuum transition-probability integral corresponding
-% to the target paper's Eqs. (10), (13), (21), (22), and (24)-(26), with:
-%   - Dirac delta -> Lorentzian collision broadening;
-%   - cylindrical q integration;
-%   - Eq. (12) in-plane magnetic form factor;
-%   - q_perp in the laser-dressing factor (a0*q_perp)^(2*l).
-%
-% Process convention:
-%   emission   : l*hOmega = DeltaE + hbar*omega_q, Bose factor N_q+1
-%   absorption : l*hOmega = DeltaE - hbar*omega_q, Bose factor N_q
+% No phenomenological Lorentzian broadening.
+% FWHM is extracted afterwards from the calculated spectrum.
 
     c = cfg.constants;
+
     Ephot = cfg.oap.photon_energy_meV(:).' * c.meV;
     nE = numel(Ephot);
-    dE = Ephot(2)-Ephot(1);
 
-    qperp = linspace(0, cfg.oap.qperp_max_inv_nm, ...
-                     cfg.oap.Nqperp) / c.nm;
-    wperp = trapezoid_weights(qperp);
-
-    [QP, QZ] = meshgrid(qperp, td(1).qz_inv_m);
-    [WP, WZ] = meshgrid( ...
-        wperp, ...
-        trapezoid_weights(td(1).qz_inv_m));
-
-    q = sqrt(QP.^2 + QZ.^2);
-
-    % Cylindrical integral:
-    % int_{-inf}^{inf}dqz int_0^inf 2*pi*qperp*dqperp /(2*pi)^3
-    measure = (2.0/(2*pi)^2) .* QP .* WP .* WZ;
-
-    populations = electron_populations_for_oap(sp, cfg);
-    E0 = cfg.laser.E0_kVcm * 1.0e5;
-    pref_oap = E0^2*sqrt(cfg.material.eps_static)/(8*pi) * (2*pi/c.hbar);
-
-    if strcmpi(cfg.laser.a0_mode, 'constant')
-        a0 = (cfg.laser.a0_nm*c.nm) .* ones(size(Ephot));
-    elseif strcmpi(cfg.laser.a0_mode, 'dynamic')
-        omega = Ephot/c.hbar;
-        mstar = cfg.material.mstar_rel*c.m0;
-        a0 = c.e*E0 ./ (mstar*omega.^2);
-    else
-        error('Unknown laser.a0_mode.');
+    if any(Ephot <= 0)
+        error(['direct_q_integral requires hbar*Omega > 0 because ', ...
+               'a0 = eE0/(m*Omega^2).']);
     end
 
     [qd, ne3d] = debye_wavevector(sp, cfg);
 
     spectrum = initialize_spectrum_struct(Ephot, cfg);
+
     spectrum.meta.qd_inv_m = qd;
     spectrum.meta.qd_inv_nm = qd*c.nm;
     spectrum.meta.screening_ne_m3 = ne3d;
-    spectrum.meta.qperp_inv_m = qperp;
+    spectrum.meta.model = 'direct_q_integral';
 
-    for im = 1:numel(cfg.oap.mechanisms)
-        mechanism = cfg.oap.mechanisms{im};
-        
+    mechanisms = cfg.oap.mechanisms;
 
-        if strcmpi(mechanism, 'optical')
-   
-            mech_key = 'optical';
-        else
-           
-            mech_key = 'piezoelectric';
+    if ischar(mechanisms)
+        mechanisms = {mechanisms};
+    end
+
+    for im = 1:numel(mechanisms)
+
+        mechanism = lower(mechanisms{im});
+
+        switch mechanism
+            case 'optical'
+                mech_key = 'optical';
+
+            case {'piezoelectric','piezo'}
+                mech_key = 'piezoelectric';
+
+            otherwise
+                error('Unsupported mechanism: %s', mechanism);
         end
 
         mechanism_total = zeros(1,nE);
@@ -75,11 +54,19 @@ function spectrum = compute_moap_direct(sp, td, cfg)
             DeltaE = td(it).deltaE_J;
             eps_n  = sp.E_J(i);
             EF     = sp.EF_J;
-            Theta  = td(it).Q_half_inv_m;
+
+            % Theta_nn' = integral |I_nn'(qz)|^2 dqz
+            Theta = td(it).Q_half_inv_m;
+
+            transition_total = zeros(1,nE);
 
             for ell = cfg.oap.photon_orders
 
-                ok = sprintf('order_%d', ell);
+                if ~ismember(ell,[1 2])
+                    error('Source derivation is restricted to ell = 1,2.');
+                end
+
+                ok = sprintf('order_%d',ell);
 
                 for iE = 1:nE
 
@@ -87,29 +74,49 @@ function spectrum = compute_moap_direct(sp, td, cfg)
 
                     P_em = direct_q_channel( ...
                         Eph, eps_n, EF, DeltaE, Theta, ...
-                        ell, +1, 'optical', qd, cfg);
+                        ell, +1, mechanism, qd, cfg);
 
                     P_ab = direct_q_channel( ...
                         Eph, eps_n, EF, DeltaE, Theta, ...
-                        ell, -1, 'optical', qd, cfg);
+                        ell, -1, mechanism, qd, cfg);
 
-                    spectrum.mechanism.optical.(ok).emission_raw(iE) = ...
-                        spectrum.mechanism.optical.(ok).emission_raw(iE) + P_em;
+                    spectrum.mechanism.(mech_key).(ok). ...
+                        emission_raw(iE) = ...
+                        spectrum.mechanism.(mech_key).(ok). ...
+                        emission_raw(iE) + P_em;
 
-                    spectrum.mechanism.optical.(ok).absorption_raw(iE) = ...
-                        spectrum.mechanism.optical.(ok).absorption_raw(iE) + P_ab;
+                    spectrum.mechanism.(mech_key).(ok). ...
+                        absorption_raw(iE) = ...
+                        spectrum.mechanism.(mech_key).(ok). ...
+                        absorption_raw(iE) + P_ab;
 
-                    spectrum.mechanism.optical.(ok).total_raw(iE) = ...
-                        spectrum.mechanism.optical.(ok).total_raw(iE) ...
-                        + P_em + P_ab;
+                    spectrum.mechanism.(mech_key).(ok). ...
+                        total_raw(iE) = ...
+                        spectrum.mechanism.(mech_key).(ok). ...
+                        total_raw(iE) + P_em + P_ab;
 
+                    transition_total(iE) = ...
+                        transition_total(iE) + P_em + P_ab;
                 end
             end
+
+            tr_key = sprintf( ...
+                'transition_%d_%d', ...
+                td(it).initial, td(it).final);
+
+            spectrum.mechanism.(mech_key). ...
+                transitions.(tr_key) = transition_total;
+
+            mechanism_total = ...
+                mechanism_total + transition_total;
         end
 
-        spectrum.mechanism.(mech_key).total_raw = mechanism_total;
-        spectrum.total_raw = spectrum.total_raw + mechanism_total;
+        spectrum.mechanism.(mech_key).total_raw = ...
+            mechanism_total;
+
+        spectrum.total_raw = ...
+            spectrum.total_raw + mechanism_total;
     end
 
-    spectrum = normalize_spectrum_for_plot(spectrum, cfg);
+    spectrum = normalize_spectrum_for_plot(spectrum,cfg);
 end

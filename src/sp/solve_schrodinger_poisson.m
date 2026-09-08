@@ -19,7 +19,7 @@ function out = solve_schrodinger_poisson(cfg)
     width = cfg.doping.width_nm * c.nm;
     Nd_z = delta_doping_profile(z, Nd_sheet, width);
 
-    n_states = 12;
+    n_states = cfg.structure.n_states;
     VH_old = zeros(size(z));
     EF_old = NaN;
     converged = false;
@@ -73,6 +73,13 @@ function out = solve_schrodinger_poisson(cfg)
     EF = solve_fermi_level(Nd_sheet, E, cfg);
     Ni = subband_sheet_populations(EF, E, cfg);
     n_z = electron_density_from_subbands(Psi, Ni);
+
+    if Nd_sheet > 0 && Ni(end) / Nd_sheet >= cfg.sp.occupation_warning_fraction
+        warning('QW:TruncatedStateBasis', [ ...
+            'Highest retained state carries %.3g of the sheet density; ', ...
+            'increase cfg.structure.n_states if this is not negligible.'], ...
+            Ni(end) / Nd_sheet);
+    end
 
     B = cfg.fields.B_T;
     Efield = cfg.fields.E_kVcm*1e5;

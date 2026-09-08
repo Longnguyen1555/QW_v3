@@ -13,7 +13,12 @@ function cfg = set_sweep_parameter(cfg, parameter, value)
         case 'nd_sheet_cm2'
             cfg.doping.Nd_sheet_cm2 = value;
         case 'alpha'
-            cfg.structure.alpha = value;
+            error('QW:UnsupportedAlphaSweep', [ ...
+                'An alpha sweep is unsupported for the Manning/sech ', ...
+                'potential and would not change its physics. Sweep ', ...
+                'manning_prefactor explicitly instead.']);
+        case 'manning_prefactor'
+            cfg.structure.manning_prefactor = value;
         case 'u0_mev'
             cfg.structure.U0_meV = value;
         otherwise

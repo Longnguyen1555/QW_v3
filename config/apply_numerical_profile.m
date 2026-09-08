@@ -4,7 +4,6 @@ function cfg = apply_numerical_profile(cfg, profile)
     switch lower(profile)
         case 'quick'
             cfg.structure.Nz = 500;
-            cfg.structure.n_states = min(cfg.structure.n_states, 4);
             cfg.sp.max_iter = 160;
             cfg.oap.Nqz = 38;
             cfg.oap.Nqperp = 38;

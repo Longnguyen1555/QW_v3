@@ -27,12 +27,15 @@ function cfg = default_config()
     cfg.structure.Lz_nm = 12.0;
     cfg.structure.manning_prefactor = 6.0;
 
-    cfg.structure.alpha = 0.30;
+    % alpha belonged to the retired polynomial potential and has no
+    % source-supported meaning for the Manning/sech model.
+    cfg.structure.alpha = NaN;
     cfg.structure.domain_nm = 60.0;
     cfg.structure.auto_domain = false;
     cfg.structure.domain_factor = 3.0;
     cfg.structure.Nz = 1502;
-    cfg.structure.n_states = 6;
+    % Historical SP baseline solved 12 states; keep that basis explicit.
+    cfg.structure.n_states = 12;
 
     %% Delta doping
     cfg.doping.Nd_sheet_cm2 = 1.0e13;
@@ -40,7 +43,7 @@ function cfg = default_config()
 
     %% Static fields
     cfg.fields.B_T = 0.0;
-    cfg.fields.E_kVcm = 1.0e8;
+    cfg.fields.E_kVcm = 0.0;
     cfg.fields.kx_inv_m = 0.0;
 
     %% Temperature
@@ -53,18 +56,21 @@ function cfg = default_config()
     cfg.sp.tol_VH_meV = 1.0e-3;
     cfg.sp.tol_EF_meV = 1.0e-3;
     cfg.sp.poisson_boundary = 'dirichlet_zero';
+    cfg.sp.occupation_warning_fraction = 1.0e-3;
 
     %% Laser
     cfg.laser.E0_kVcm = 4.5;
-    cfg.laser.a0_mode = 'constant'; %'dynamic'
+    cfg.laser.a0_mode = 'dynamic'; %'dynamic'
     cfg.laser.a0_nm = 7.5;
 
     %% OAP model
     cfg.oap.model = 'direct_q_integral';
     cfg.oap.transitions = [1 2];
-    cfg.oap.photon_orders = [1 2 3];
+    % The supplied detailed derivation supports only 1PA and 2PA.
+    cfg.oap.photon_orders = [1 2];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-    cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
+    % Dynamic a0 is undefined at zero photon energy.
+    cfg.oap.photon_energy_meV = 2.0:0.010:100.0;
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
 
@@ -73,6 +79,12 @@ function cfg = default_config()
     cfg.oap.qperp_max_inv_nm = 1.5;
     cfg.oap.Nqz = 90;
     cfg.oap.Nqperp = 90;
+    % Source derivation: q ~= q_perp, with the qz form factor separated.
+    % generalized_3d retains q = sqrt(q_perp^2 + qz^2) for comparison.
+    cfg.oap.q_model = 'source_qperp';
+    % Controlled quadrature for the momentum left after delta integration.
+    cfg.oap.Nkin_perp = 80;
+    cfg.oap.fermi_tail_kBT = 40;
 
     cfg.oap.inplane_factor = 'none';
     cfg.oap.landau_initial = 0;

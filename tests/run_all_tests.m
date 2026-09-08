@@ -15,6 +15,7 @@ function run_all_tests()
     test_legacy_broadening_width();
     test_fwhm_does_not_change_sp();
     test_resonance_positions();
+    test_physics_configuration();
     test_full_pipeline();
 
     fprintf('ALL TESTS PASSED\n');

@@ -7,10 +7,10 @@ Si delta-doped anharmonic GaAs quantum well with:
 - perpendicular electric field and in-plane magnetic field;
 - electron-LO-phonon scattering with Debye screening;
 - electron-piezoelectric-phonon scattering with Debye screening;
-- 1PA, 2PA and 3PA;
+- source-validated 1PA and 2PA (higher orders are explicit extrapolations);
 - phonon emission and absorption separated;
 - spectra versus photon energy;
-- parameter sweeps versus B, T, Lz, E, doping, alpha or U0;
+- parameter sweeps versus B, T, Lz, E, doping, Manning prefactor or U0;
 - FWHM/HWHM extraction without the Signal Processing Toolbox.
 
 ## Run
@@ -26,7 +26,8 @@ The results are saved in `results/`.
 
 1. Anharmonic potential
 
-   `U_A(z) = U0 (z/Lz)^2 [alpha (z/Lz)^6 - 1]`
+   `U_A(z) = U0 p [sech(z/Lz)^4 - sech(z/Lz)^2]`, with configured
+   Manning prefactor `p`. The retired `alpha` parameter is unsupported.
 
 2. Self-consistent Poisson equation
 
@@ -58,8 +59,8 @@ The results are saved in `results/`.
       kappa^2 hbar e^2 s/(2 eps_s eps0)
       q^3/(q^2+qd^2)^2`
 
-8. Lorentzian replacement of the Dirac delta and numerical cylindrical
-   q integration.
+8. Direct delta-function integration over the in-plane electron momentum;
+   optional Lorentzian broadening is visualization-only.
 
 ## Important modeling choice
 

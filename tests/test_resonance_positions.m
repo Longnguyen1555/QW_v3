@@ -1,35 +1,28 @@
 function test_resonance_positions()
-% For a constant LO phonon, expected peaks are
-% (DeltaE +/- hbar*omega_LO)/ell within Lorentzian/grid tolerance.
+%TEST_RESONANCE_POSITIONS Verify the exact k_parallel delta-function root.
 
-    cfg = apply_numerical_profile(default_config(),'quick');
-    cfg.fields.E_kVcm = 0;
-    cfg.oap.broadening.mode = 'legacy_lorentzian';
-    cfg.oap.mechanisms = {'optical'};
-    cfg.oap.photon_orders = [1 2];
-    sp = solve_schrodinger_poisson(cfg);
-    td = compute_transition_data(sp,cfg);
-    s = compute_moap_spectrum(sp,td,cfg);
+    cfg = default_config();
+    c = cfg.constants;
+    mstar = cfg.material.mstar_rel*c.m0;
+    qperp = 0.42/c.nm;
+    deltaE = 31.0*c.meV;
+    hw = cfg.material.LO_phonon_meV*c.meV;
+    Eph = 78.0*c.meV;
+    ell = 1;
+    A = c.hbar^2/(2*mstar);
 
-    hw = cfg.material.LO_phonon_meV;
-    dE = td(1).deltaE_meV;
-    tolerance = 2.0;
+    balance_em = ell*Eph - deltaE - hw;
+    k_em = inplane_delta_root(qperp, balance_em, cfg);
+    residual_em = deltaE + A*qperp^2 + 2*A*k_em*qperp + hw - ell*Eph;
+    assert(abs(residual_em) < 1e-12*c.meV, ...
+        'Emission delta root does not satisfy energy conservation.');
 
-    for ell = cfg.oap.photon_orders
-        ok = sprintf('order_%d',ell);
-        em = profile_fwhm(s.energy_meV, ...
-             s.mechanism.optical.(ok).emission_raw);
-        expected_em = (dE+hw)/ell;
-        assert(abs(em.peak_x-expected_em) < tolerance, ...
-            'Optical emission resonance-position test failed.');
-
-        expected_ab = (dE-hw)/ell;
-        if expected_ab > min(s.energy_meV)
-            ab = profile_fwhm(s.energy_meV, ...
-                 s.mechanism.optical.(ok).absorption_raw);
-            assert(abs(ab.peak_x-expected_ab) < tolerance, ...
-                'Optical absorption resonance-position test failed.');
-        end
-    end
-    fprintf('  PASS: resonance positions\n');
+    balance_ab = ell*Eph - deltaE + hw;
+    k_ab = inplane_delta_root(qperp, balance_ab, cfg);
+    residual_ab = deltaE + A*qperp^2 + 2*A*k_ab*qperp - hw - ell*Eph;
+    assert(abs(residual_ab) < 1e-12*c.meV, ...
+        'Absorption delta root does not satisfy energy conservation.');
+    assert(abs(k_em-k_ab) > 0, ...
+        'Optical phonons must not collapse to a q-independent resonance.');
+    fprintf('  PASS: delta-root energy conservation\n');
 end

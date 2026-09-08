@@ -21,7 +21,7 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                      cfg.oap.Nqperp) / c.nm;
     wperp = trapezoid_weights(qperp);
 
-   [QP, QZ] = meshgrid(qperp, td(1).qz_inv_m);
+    [QP, QZ] = meshgrid(qperp, td(1).qz_inv_m);
     [WP, WZ] = meshgrid( ...
         wperp, ...
         trapezoid_weights(td(1).qz_inv_m));
@@ -56,62 +56,55 @@ function spectrum = compute_moap_direct(sp, td, cfg)
 
     for im = 1:numel(cfg.oap.mechanisms)
         mechanism = cfg.oap.mechanisms{im};
-        [C2V, hw, Nph] = phonon_coupling_density(mechanism, q, qd, cfg);
+        
 
         if strcmpi(mechanism, 'optical')
-            gamma = cfg.oap.gamma_optical_meV*c.meV;
+   
             mech_key = 'optical';
         else
-            gamma = cfg.oap.gamma_piezo_meV*c.meV;
+           
             mech_key = 'piezoelectric';
         end
 
         mechanism_total = zeros(1,nE);
 
         for it = 1:numel(td)
+
             i = td(it).initial;
-            deltaE = td(it).deltaE_J;
-            I2grid = repmat(td(it).I2(:), 1, numel(qperp));
 
-            base = measure .* C2V .* I2grid;
-            
-            transition_total = zeros(1,nE);
+            DeltaE = td(it).deltaE_J;
+            eps_n  = sp.E_J(i);
+            EF     = sp.EF_J;
+            Theta  = td(it).Q_half_inv_m;
 
-            for order = cfg.oap.photon_orders
-                dressing_q = QP.^(2*order) ./ ...
-                    (2^(2*order) * factorial(order)^2);
+            for ell = cfg.oap.photon_orders
 
-                w_em = base .* dressing_q .* (Nph + 1.0);
-                w_ab = base .* dressing_q .* Nph;
+                ok = sprintf('order_%d', ell);
 
-                centers_em = (deltaE + hw) ./ order;
-                centers_ab = (deltaE - hw) ./ order;
+                for iE = 1:nE
 
-                shape_em = broaden_binned_centers(Ephot, centers_em, ...
-                    w_em, order, gamma);
-                shape_ab = broaden_binned_centers(Ephot, centers_ab, ...
-                    w_ab, order, gamma);
+                    Eph = Ephot(iE);
 
-                energy_pref = pref_oap .* populations(i) .* (a0.^(2*order));
+                    P_em = direct_q_channel( ...
+                        Eph, eps_n, EF, DeltaE, Theta, ...
+                        ell, +1, 'optical', qd, cfg);
 
-                P_em = energy_pref .* shape_em;
-                P_ab = energy_pref .* shape_ab;
-                P_order = P_em + P_ab;
+                    P_ab = direct_q_channel( ...
+                        Eph, eps_n, EF, DeltaE, Theta, ...
+                        ell, -1, 'optical', qd, cfg);
 
-                order_key = sprintf('order_%d', order);
-                spectrum.mechanism.(mech_key).(order_key).emission_raw = ...
-                    spectrum.mechanism.(mech_key).(order_key).emission_raw + P_em;
-                spectrum.mechanism.(mech_key).(order_key).absorption_raw = ...
-                    spectrum.mechanism.(mech_key).(order_key).absorption_raw + P_ab;
-                spectrum.mechanism.(mech_key).(order_key).total_raw = ...
-                    spectrum.mechanism.(mech_key).(order_key).total_raw + P_order;
+                    spectrum.mechanism.optical.(ok).emission_raw(iE) = ...
+                        spectrum.mechanism.optical.(ok).emission_raw(iE) + P_em;
 
-                transition_total = transition_total + P_order;
+                    spectrum.mechanism.optical.(ok).absorption_raw(iE) = ...
+                        spectrum.mechanism.optical.(ok).absorption_raw(iE) + P_ab;
+
+                    spectrum.mechanism.optical.(ok).total_raw(iE) = ...
+                        spectrum.mechanism.optical.(ok).total_raw(iE) ...
+                        + P_em + P_ab;
+
+                end
             end
-
-            tr_key = sprintf('transition_%d_%d', td(it).initial, td(it).final);
-            spectrum.mechanism.(mech_key).transitions.(tr_key) = transition_total;
-            mechanism_total = mechanism_total + transition_total;
         end
 
         spectrum.mechanism.(mech_key).total_raw = mechanism_total;

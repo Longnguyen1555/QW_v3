@@ -47,8 +47,8 @@ function cfg = default_config()
     cfg.temperature_K = 90.0;
 
     %% Schrodinger-Poisson controls
-    cfg.sp.max_outer = 100;
-    cfg.sp.max_inner = 500;
+    cfg.sp.max_iter = 300;
+    
     cfg.sp.mix = 0.50;
     cfg.sp.tol_VH_meV = 1.0e-3;
     cfg.sp.tol_EF_meV = 1.0e-3;
@@ -65,7 +65,7 @@ function cfg = default_config()
     cfg.oap.photon_orders = [1 2 3];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
     cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
-    cfg.oap.population_mode = 'maxwell_boltzmann';
+    cfg.oap.population_mode = 'fermi_dirac';
     cfg.oap.include_pauli_blocking = false;
 
     % q integration: q is in nm^-1 at the user level
@@ -79,8 +79,6 @@ function cfg = default_config()
     cfg.oap.landau_final = 0;
     cfg.oap.thermal_cutoff_factor = 1.0;
 
-    cfg.oap.gamma_optical_meV = 0.80;
-    cfg.oap.gamma_piezo_meV = 0.60;
 
     cfg.oap.screening_density_mode = 'fixed';
     cfg.oap.fixed_ne_cm3 = 1.0e18;

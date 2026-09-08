@@ -5,9 +5,9 @@ optical,2,emission,33.46,0.0100000000000051,0.00500000000000256
 optical,2,absorption,2,NaN,NaN
 optical,3,emission,22.31,0.00999999999999801,0.00499999999999901
 optical,3,absorption,2,NaN,NaN
-piezoelectric,1,emission,35.78,0.0148589332837972,0.00742946664189859
-piezoelectric,1,absorption,25.73,0.0121897474944355,0.00609487374721773
+piezoelectric,1,emission,35.78,0.0148662602022966,0.00743313010114832
+piezoelectric,1,absorption,25.73,0.0121895987279359,0.00609479936396795
 piezoelectric,2,emission,17.86,NaN,NaN
-piezoelectric,2,absorption,12.78,NaN,NaN
+piezoelectric,2,absorption,12.77,NaN,NaN
 piezoelectric,3,emission,11.93,NaN,NaN
-piezoelectric,3,absorption,8.51,NaN,NaN
+piezoelectric,3,absorption,8.49,NaN,NaN

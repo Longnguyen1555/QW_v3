@@ -6,6 +6,7 @@ function cfg = default_config()
     %% Run control
     cfg.run.task = 'single';
     cfg.run.verbose = true;
+    cfg.run.debug_moap_direct = false;
 
     %% Material: GaAs
     cfg.material.name = 'GaAs';
@@ -40,7 +41,7 @@ function cfg = default_config()
 
     %% Static fields
     cfg.fields.B_T = 0.0;
-    cfg.fields.E_kVcm = 1.0e8;
+    cfg.fields.E_kVcm = 0.0;
     cfg.fields.kx_inv_m = 0.0;
 
     %% Temperature
@@ -74,7 +75,7 @@ function cfg = default_config()
     cfg.oap.Nqz = 90;
     cfg.oap.Nqperp = 90;
 
-    cfg.oap.inplane_factor = 'landau';
+    cfg.oap.inplane_factor = 'none';
     cfg.oap.landau_initial = 0;
     cfg.oap.landau_final = 0;
     cfg.oap.thermal_cutoff_factor = 1.0;

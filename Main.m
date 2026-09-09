@@ -30,6 +30,7 @@ cfg.run.task = 'all_demo';
 
 % Numerical profile: 'quick', 'standard', or 'high_accuracy'
 cfg = apply_numerical_profile(cfg, 'standard');
+cfg.run.debug_moap_direct = true;
 
 % Main physical parameters
 cfg.structure.Lz_nm       = 5.0;
@@ -42,14 +43,13 @@ cfg.fields.E_kVcm         = 0.0;
 cfg.temperature_K         = 90.0;
 
 % Transition indices are MATLAB 1-based subband indices.
-cfg.oap.model             = 'direct_q_integral';
+cfg.oap.model             = 'direct_q_integral'; % analytical_series/direct_q_integral
 cfg.oap.transitions       = [1 2];
-cfg.oap.photon_orders     = [1 2 3];
+cfg.oap.photon_orders     = [1 2];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
 
 % Photon-energy scan
 cfg.oap.photon_energy_meV = 8.0:0.01:100.0;
-
 % Sweep used by 'sweep_spectra' and 'linewidth_sweep'
 % Supported names: 'B_T', 'T_K', 'Lz_nm', 'E_kVcm',
 %                  'Nd_sheet_cm2', 'alpha', 'U0_meV'

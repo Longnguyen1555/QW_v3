@@ -94,7 +94,7 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                     w_ab, order, gamma);
 
                 energy_pref = pref_oap .* populations(i) .* Mrad2 .* ...
-                    (a0.^(2*order)) ./ (Ephot.^2);
+                    (a0.^(2*order));
 
                 P_em = energy_pref .* shape_em;
                 P_ab = energy_pref .* shape_ab;

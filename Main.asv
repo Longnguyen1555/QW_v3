@@ -53,8 +53,8 @@ cfg.oap.photon_energy_meV = 8.0:0.01:100.0;
 % Sweep used by 'sweep_spectra' and 'linewidth_sweep'
 % Supported names: 'B_T', 'T_K', 'Lz_nm', 'E_kVcm',
 %                  'Nd_sheet_cm2', 'alpha', 'U0_meV'
-cfg.sweep.parameter       = 'manning_prefactor';
-cfg.sweep.values          = [0 0.5 1.0 1.5 2.0];
+cfg.sweep.parameter       = 'Nd_sheet_cm2';
+cfg.sweep.values          = [1e10 1e11 1e12 1e13 1e14];
 
 % Output
 cfg.output.directory      = fullfile(project_root, 'results');

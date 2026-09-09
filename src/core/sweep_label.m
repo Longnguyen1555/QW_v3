@@ -11,8 +11,8 @@ function label = sweep_label(parameter, value)
             label = sprintf('E = %.3g kV/cm', value);
         case 'nd_sheet_cm2'
             label = sprintf('N_D = %.3g cm^{-2}', value);
-        case 'alpha'
-            label = sprintf('\\alpha = %.3g', value);
+        case 'manning_prefactor'
+            label = sprintf('\\nu = %.3g', value);
         case 'u0_mev'
             label = sprintf('U_0 = %.3g meV', value);
         otherwise

@@ -5,6 +5,7 @@ function U = anharmonic_potential(z, cfg)
     c = cfg.constants;
     Lz = cfg.structure.Lz_nm * c.nm;
     U0 = cfg.structure.U0_meV * c.meV;
+    nu = cfg.structure.manning_prefactor;
     u = z ./ Lz;
-    U = U0 .* 6.0 .* (sech(u).^4 - sech(u).^2);
+    U = U0 .* nu .* (sech(u).^4 - sech(u).^2);
 end

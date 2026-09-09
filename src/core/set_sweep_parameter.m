@@ -12,8 +12,8 @@ function cfg = set_sweep_parameter(cfg, parameter, value)
             cfg.fields.E_kVcm = value;
         case 'nd_sheet_cm2'
             cfg.doping.Nd_sheet_cm2 = value;
-        case 'alpha'
-            cfg.structure.alpha = value;
+        case 'manning_prefactor'
+            cfg.structure.manning_prefactor = value;
         case 'u0_mev'
             cfg.structure.U0_meV = value;
         otherwise

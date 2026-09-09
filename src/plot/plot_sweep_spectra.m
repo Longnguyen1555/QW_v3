@@ -722,10 +722,10 @@ function label = sweep_legend_label(parameter, value)
                 value);
 
 
-        case 'alpha'
+        case 'manning_prefactor'
 
             label = sprintf( ...
-                '$\\alpha = %.3g$', ...
+                '$\\nu = %.3g$', ...
                 value);
 
 

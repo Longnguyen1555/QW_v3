@@ -64,7 +64,7 @@ function cfg = default_config()
     cfg.oap.transitions = [1 2];
     cfg.oap.photon_orders = [1 2 3];
     cfg.oap.mechanisms = {'optical', 'piezoelectric'};
-    cfg.oap.photon_energy_meV = 0.0:0.010:100.0;
+    cfg.oap.photon_energy_meV = 7.5:0.01:100.0;
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
 

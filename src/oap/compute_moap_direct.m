@@ -170,11 +170,16 @@ function spectrum = compute_moap_direct(sp, td, cfg)
         mechanism_total = zeros(1,nE);
 
         for it = 1:numel(td)
+
             i = td(it).initial;
             deltaE = td(it).deltaE_J;
             I2grid = repmat(td(it).I2(:), 1, numel(qperp));
-
             base = measure .* C2V .* I2grid;
+            lw = compute_collision_linewidth(base, Nph, c);
+
+            gamma_em = lw.gamma_em_J;
+            gamma_ab = lw.gamma_ab_J;
+
 
             assert(all(isfinite(I2grid(:))), ...
                 'I2grid contains NaN/Inf.');
@@ -237,9 +242,9 @@ function spectrum = compute_moap_direct(sp, td, cfg)
                 end
 
                 shape_em = broaden_binned_centers(Ephot, centers_em, ...
-                    w_em, order, gamma);
+                    w_em, order, gamma_em);
                 shape_ab = broaden_binned_centers(Ephot, centers_ab, ...
-                    w_ab, order, gamma);
+                    w_ab, order, gamma_ab);
 
                 if dbg
                     EmeV = Ephot/c.meV;
@@ -310,4 +315,28 @@ function spectrum = compute_moap_direct(sp, td, cfg)
     end
 
     spectrum = normalize_spectrum_for_plot(spectrum, cfg);
+end
+
+function lw = compute_collision_linewidth(eph_kernel, Nph, c)
+%COMPUTE_COLLISION_LINEWIDTH
+% Collision broadening:
+%   Gamma_sigma^2 = sum_q |M_e-ph^sigma(q)|^2
+%
+% Gamma returned here is HWHM in the DETUNING energy variable.
+
+    gamma2_em = sum(eph_kernel .* (Nph + 1.0), 'all');
+    gamma2_ab = sum(eph_kernel .* Nph,         'all');
+
+    % Numerical safety only
+    gamma2_em = max(real(gamma2_em), 0);
+    gamma2_ab = max(real(gamma2_ab), 0);
+
+    lw.gamma2_em_J2 = gamma2_em;
+    lw.gamma2_ab_J2 = gamma2_ab;
+
+    lw.gamma_em_J = sqrt(gamma2_em);
+    lw.gamma_ab_J = sqrt(gamma2_ab);
+
+    lw.gamma_em_meV = lw.gamma_em_J / c.meV;
+    lw.gamma_ab_meV = lw.gamma_ab_J / c.meV;
 end

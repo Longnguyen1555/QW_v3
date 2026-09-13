@@ -54,7 +54,7 @@ cfg.oap.photon_energy_meV = 2.0:0.01:250.0;
 % Supported names: 'B_T', 'T_K', 'Lz_nm', 'E_kVcm',
 %                  'Nd_sheet_cm2', 'alpha', 'U0_meV'
 cfg.sweep.parameter       = 'manning_prefactor';
-cfg.sweep.values          = [0 0.5 1.0 1.5 2.0];
+cfg.sweep.values          = 2.0:0.5:10.0;
 
 % Output
 cfg.output.directory      = fullfile(project_root, 'results');

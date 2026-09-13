@@ -7,14 +7,31 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 %   Color + marker -> sweep-parameter value
 %   Line style     -> solid for every case
 %
-% This follows the spectrum-sweep figures in the reference papers,
-% especially Fig. 3, Fig. 5 and Fig. 7 of:
+% Only three representative sweep cases are displayed:
 %
-%   Micro and Nanostructures 198 (2025) 208062
+%   start -> first sweep value
+%   mid   -> middle sweep value
+%   end   -> last sweep value
+%
+% Example:
+%
+%   cfg.sweep.values = 2.0:1.0:10.0;
+%
+% Full calculated sweep:
+%
+%   2 3 4 5 6 7 8 9 10
+%
+% Displayed spectra:
+%
+%   2 6 10
+%
+% The complete sweep is still calculated outside this plotting function.
+% This function only reduces the number of curves displayed in the
+% MOAP sweep figure.
 %
 % Main plotting rules:
 %
-%   1) every sweep case is plotted on the SAME vertical scale,
+%   1) displayed sweep cases are plotted on the SAME vertical scale,
 %   2) photon energy is written as hbar*Omega,
 %   3) sparse numerical markers are placed on each curve,
 %   4) minor ticks are enabled,
@@ -27,7 +44,9 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %  Input validation
     % =====================================================================
     if nargin < 4
+
         error('plot_sweep_spectra requires a mechanism.');
+
     end
 
 
@@ -58,7 +77,45 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     end
 
 
-    n_cases = numel(cases);
+    n_cases_all = numel(cases);
+
+
+    %% ====================================================================
+    %  Select start - mid - end
+    %
+    %  The full sweep has already been calculated by run_parameter_sweep.
+    %  Only three representative cases are selected here for visualization.
+    %
+    %  For an odd number of cases:
+    %
+    %       2:1:10
+    %       -> 9 cases
+    %       -> indices [1 5 9]
+    %       -> values  [2 6 10]
+    %
+    %  For an even number of cases, the lower of the two central grid
+    %  points is selected.
+    %
+    %  unique(...,'stable') also handles sweeps containing only one or
+    %  two cases.
+    % =====================================================================
+    idx_start = 1;
+
+    idx_mid = ...
+        floor((n_cases_all + 1) / 2);
+
+    idx_end = ...
+        n_cases_all;
+
+
+    idx_plot = ...
+        unique( ...
+            [idx_start, idx_mid, idx_end], ...
+            'stable');
+
+
+    n_cases = ...
+        numel(idx_plot);
 
 
     %% ====================================================================
@@ -69,12 +126,9 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %  For a sweep figure, relative peak heights between different cases
     %  are physically meaningful.
     %
-    %  normalize_spectrum_for_plot() currently normalizes EACH case
-    %  independently when plot_normalization = 'global_max'.
-    %
-    %  Therefore this function intentionally reconstructs the plotted
-    %  curves from total_raw and, if requested, applies ONE common
-    %  normalization factor to all sweep cases.
+    %  Therefore this function reconstructs the plotted curves from
+    %  total_raw and, if requested, applies ONE common normalization
+    %  factor to the three displayed sweep cases.
     % =====================================================================
     Ecell = cell(1, n_cases);
 
@@ -86,7 +140,12 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 
     for i = 1:n_cases
 
-        spectrum = cases{i}.spectrum;
+        case_idx = ...
+            idx_plot(i);
+
+
+        spectrum = ...
+            cases{case_idx}.spectrum;
 
 
         if ~isfield(spectrum.mechanism, mk)
@@ -94,42 +153,51 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
             error( ...
                 'Mechanism "%s" not found in sweep case %d.', ...
                 mk, ...
-                i);
+                case_idx);
 
         end
 
 
-        E_i = spectrum.energy_meV(:);
+        E_i = ...
+            spectrum.energy_meV(:);
 
-        P_i = spectrum.mechanism.(mk).total_raw(:);
+        P_i = ...
+            spectrum.mechanism.(mk).total_raw(:);
 
 
         if numel(E_i) ~= numel(P_i)
 
             error( ...
-                'Photon-energy and MOAP array sizes differ in case %d.', ...
-                i);
+                ['Photon-energy and MOAP array sizes differ ' ...
+                 'in case %d.'], ...
+                case_idx);
 
         end
 
 
-        Ecell{i} = E_i;
+        Ecell{i} = ...
+            E_i;
 
-        Praw{i} = P_i;
+        Praw{i} = ...
+            P_i;
 
 
-        finite_P = P_i(isfinite(P_i));
+        finite_P = ...
+            P_i(isfinite(P_i));
 
 
         if ~isempty(finite_P)
 
-            Pi_max = max(abs(finite_P));
+            Pi_max = ...
+                max(abs(finite_P));
+
 
             if isfinite(Pi_max)
 
-                common_max = max( ...
-                    common_max, ...
-                    Pi_max);
+                common_max = ...
+                    max( ...
+                        common_max, ...
+                        Pi_max);
 
             end
 
@@ -141,23 +209,27 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %% ====================================================================
     %  Common normalization
     %
-    %  One scale for ALL sweep cases.
+    %  One scale for start, mid and end.
     % =====================================================================
     if strcmpi(cfg.oap.plot_normalization, 'global_max')
 
-        common_scale = common_max;
+        common_scale = ...
+            common_max;
 
 
-        if ~isfinite(common_scale) || common_scale <= 0
+        if ~isfinite(common_scale) || ...
+                common_scale <= 0
 
-            common_scale = 1.0;
+            common_scale = ...
+                1.0;
 
         end
 
 
     elseif strcmpi(cfg.oap.plot_normalization, 'none')
 
-        common_scale = 1.0;
+        common_scale = ...
+            1.0;
 
 
     else
@@ -179,7 +251,9 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
         'Position', [100 100 710 520]);
 
 
-    ax = axes(fig);
+    ax = ...
+        axes(fig);
+
 
     hold(ax, 'on');
 
@@ -187,12 +261,11 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %% ====================================================================
     %  Sweep colors
     %
-    %  The first three colors are chosen close to the visual convention
-    %  used in the reference OAP sweep figures:
+    %  For the three representative curves:
     %
-    %       magenta -> blue -> dark red
-    %
-    %  Additional colors allow sweeps containing more than three cases.
+    %       start -> magenta
+    %       mid   -> blue
+    %       end   -> dark red
     % =====================================================================
     sweep_colors = [ ...
         0.850 0.000 0.850; ...   % magenta
@@ -219,23 +292,33 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %% ====================================================================
     %  Storage
     % =====================================================================
-    legend_handles = gobjects(0);
+    legend_handles = ...
+        gobjects(0);
 
-    legend_labels = {};
+    legend_labels = ...
+        {};
 
-    x_active_all = [];
+    x_active_all = ...
+        [];
 
-    y_all = [];
+    y_all = ...
+        [];
 
 
     %% ====================================================================
-    %  Plot every sweep case
+    %  Plot start, mid and end
     % =====================================================================
     for i = 1:n_cases
 
-        E = Ecell{i};
+        case_idx = ...
+            idx_plot(i);
 
-        P = Praw{i} ./ common_scale;
+
+        E = ...
+            Ecell{i};
+
+        P = ...
+            Praw{i} ./ common_scale;
 
 
         %% ----------------------------------------------------------------
@@ -244,12 +327,14 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
         color_idx = ...
             mod(i - 1, size(sweep_colors, 1)) + 1;
 
+
         marker_idx = ...
             mod(i - 1, numel(sweep_markers)) + 1;
 
 
         curve_color = ...
             sweep_colors(color_idx, :);
+
 
         curve_marker = ...
             sweep_markers{marker_idx};
@@ -258,9 +343,7 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
         %% ----------------------------------------------------------------
         %  Main spectrum
         %
-        %  All lines remain SOLID, as in the reference parameter-sweep
-        %  spectra. Line style is therefore not overloaded with another
-        %  physical meaning.
+        %  All lines remain solid, as in the original sweep plot.
         % -----------------------------------------------------------------
         h = plot( ...
             ax, ...
@@ -271,20 +354,33 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
             'LineWidth', 1.65);
 
 
-        legend_handles(end+1) = h; %#ok<AGROW>
+        legend_handles(end+1) = ...
+            h; %#ok<AGROW>
 
 
         %% ----------------------------------------------------------------
         %  Legend label
+        %
+        %  IMPORTANT:
+        %
+        %  case_idx is the index in the FULL sweep.
+        %
+        %  Therefore:
+        %
+        %       cfg.sweep.values(case_idx)
+        %
+        %  must be used instead of cfg.sweep.values(i).
         % -----------------------------------------------------------------
-        sweep_value = NaN;
+        sweep_value = ...
+            NaN;
 
 
         if isfield(cfg, 'sweep') && ...
                 isfield(cfg.sweep, 'values') && ...
-                numel(cfg.sweep.values) >= i
+                numel(cfg.sweep.values) >= case_idx
 
-            sweep_value = cfg.sweep.values(i);
+            sweep_value = ...
+                cfg.sweep.values(case_idx);
 
         end
 
@@ -296,17 +392,21 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
                     cfg.sweep.parameter, ...
                     sweep_value); %#ok<AGROW>
 
+
         elseif nargin >= 2 && ...
-                numel(labels) >= i
+                numel(labels) >= case_idx
 
             % Compatibility fallback.
             legend_labels{end+1} = ...
-                labels{i}; %#ok<AGROW>
+                labels{case_idx}; %#ok<AGROW>
+
 
         else
 
             legend_labels{end+1} = ...
-                sprintf('Case %d', i); %#ok<AGROW>
+                sprintf( ...
+                    'Case %d', ...
+                    case_idx); %#ok<AGROW>
 
         end
 
@@ -317,25 +417,31 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
         %  Threshold is relative to the maximum of each case separately.
         %
         %  This ensures that a weak spectrum is not discarded merely
-        %  because another sweep case has a much larger absorption peak.
+        %  because another displayed sweep case has a much larger
+        %  absorption peak.
         % -----------------------------------------------------------------
-        P_abs = abs(P);
+        P_abs = ...
+            abs(P);
+
 
         finite_mask = ...
             isfinite(E) & ...
             isfinite(P);
 
 
-        Pfinite = P_abs(finite_mask);
+        Pfinite = ...
+            P_abs(finite_mask);
 
 
         if ~isempty(Pfinite)
 
-            Pmax_case = max(Pfinite);
+            Pmax_case = ...
+                max(Pfinite);
 
         else
 
-            Pmax_case = 0;
+            Pmax_case = ...
+                0;
 
         end
 
@@ -347,14 +453,16 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
                 1.0e-4 * Pmax_case;
 
 
-            idx_active = find( ...
-                finite_mask & ...
-                P_abs >= active_threshold);
+            idx_active = ...
+                find( ...
+                    finite_mask & ...
+                    P_abs >= active_threshold);
 
 
         else
 
-            idx_active = [];
+            idx_active = ...
+                [];
 
         end
 
@@ -372,10 +480,13 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
                 min(24, numel(idx_active));
 
 
-            marker_pos = unique(round(linspace( ...
-                1, ...
-                numel(idx_active), ...
-                n_marker)));
+            marker_pos = ...
+                unique( ...
+                    round( ...
+                        linspace( ...
+                            1, ...
+                            numel(idx_active), ...
+                            n_marker)));
 
 
             idx_marker = ...
@@ -447,6 +558,7 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
             'Interpreter', 'latex', ...
             'FontSize', 13);
 
+
     else
 
         ylabel( ...
@@ -461,7 +573,8 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %% ====================================================================
     %  X-axis limits
     %
-    %  Use the UNION of all physically active sweep spectra.
+    %  Use the UNION of the physically active regions of the three
+    %  displayed sweep spectra.
     %
     %  This is required because changing B, T, Lz, U0, etc. can shift
     %  resonance peaks substantially to the left or right.
@@ -490,51 +603,69 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 
         else
 
-            xpad = 0;
+            xpad = ...
+                0;
 
         end
 
 
-        all_E_min = inf;
+        all_E_min = ...
+            inf;
 
-        all_E_max = -inf;
+        all_E_max = ...
+            -inf;
 
 
         for i = 1:n_cases
 
-            Ei = Ecell{i};
+            Ei = ...
+                Ecell{i};
 
-            Ei = Ei(isfinite(Ei));
+
+            Ei = ...
+                Ei(isfinite(Ei));
 
 
             if isempty(Ei)
+
                 continue;
+
             end
 
 
             all_E_min = ...
-                min(all_E_min, min(Ei));
+                min( ...
+                    all_E_min, ...
+                    min(Ei));
+
 
             all_E_max = ...
-                max(all_E_max, max(Ei));
+                max( ...
+                    all_E_max, ...
+                    max(Ei));
 
         end
 
 
-        xmin = max( ...
-            all_E_min, ...
-            xmin_active - xpad);
+        xmin = ...
+            max( ...
+                all_E_min, ...
+                xmin_active - xpad);
 
-        xmax = min( ...
-            all_E_max, ...
-            xmax_active + xpad);
+
+        xmax = ...
+            min( ...
+                all_E_max, ...
+                xmax_active + xpad);
 
 
         if isfinite(xmin) && ...
                 isfinite(xmax) && ...
                 xmax > xmin
 
-            xlim(ax, [xmin xmax]);
+            xlim( ...
+                ax, ...
+                [xmin xmax]);
 
         end
 
@@ -544,7 +675,7 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %% ====================================================================
     %  Y-axis limits
     %
-    %  All sweep cases share exactly the same y-axis.
+    %  Start, mid and end share exactly the same y-axis.
     %
     %  MOAP is non-negative; therefore zero is retained as the physical
     %  baseline whenever negative values are only numerical round-off.
@@ -571,10 +702,12 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 
             if ymin >= -negative_tolerance
 
-                ylim(ax, [ ...
-                    0, ...
-                    1.055 * ymax ...
-                ]);
+                ylim( ...
+                    ax, ...
+                    [ ...
+                        0, ...
+                        1.055 * ymax ...
+                    ]);
 
 
             else
@@ -586,10 +719,12 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
                     0.04 * yrange;
 
 
-                ylim(ax, [ ...
-                    ymin - ypad, ...
-                    ymax + ypad ...
-                ]);
+                ylim( ...
+                    ax, ...
+                    [ ...
+                        ymin - ypad, ...
+                        ymax + ypad ...
+                    ]);
 
             end
 
@@ -602,7 +737,7 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %  Legend
     %
     %  Parameter values, rather than generic "case 1", "case 2", etc.,
-    %  are used in the same way as the reference sweep spectra.
+    %  are used in the same way as the original sweep spectra.
     % =====================================================================
     if ~isempty(legend_handles)
 
@@ -618,12 +753,14 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 
         if numel(legend_labels) > 5
 
-            lgd.NumColumns = 2;
+            lgd.NumColumns = ...
+                2;
 
         end
 
 
-        lgd.ItemTokenSize = [24 10];
+        lgd.ItemTokenSize = ...
+            [24 10];
 
     end
 
@@ -652,20 +789,25 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
 
     grid(ax, 'on');
 
-    ax.GridLineStyle = '--';
 
-    ax.GridAlpha = 0.20;
+    ax.GridLineStyle = ...
+        '--';
 
-    ax.XMinorGrid = 'off';
+    ax.GridAlpha = ...
+        0.20;
 
-    ax.YMinorGrid = 'off';
+    ax.XMinorGrid = ...
+        'off';
+
+    ax.YMinorGrid = ...
+        'off';
 
 
     %% ====================================================================
     %  No title
     %
-    %  The sweep parameter and the fixed physical parameters should be
-    %  stated in the figure caption, as in the reference papers.
+    %  The sweep parameter and fixed physical parameters should be stated
+    %  in the figure caption, as in the reference papers.
     % =====================================================================
 
 
@@ -673,7 +815,9 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     %  Compact publication layout
     % =====================================================================
     ax.LooseInset = ...
-        max(ax.TightInset, 0.02);
+        max( ...
+            ax.TightInset, ...
+            0.02);
 
 
 end

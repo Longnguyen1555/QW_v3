@@ -16,7 +16,7 @@
 | Magnetic/Laguerre factor, target Eq. (12) | `src/oap/landau_form_factor_squared.m` |
 | Second-order q-space transition probability | `src/oap/compute_moap_direct.m` |
 | Dirac delta to Lorentzian | `src/oap/broaden_binned_centers.m` |
-| Analytical Taylor-Bessel Eq. (5)/(7) | `src/oap/compute_moap_analytical_series.m` |
+| Refined analytical power, Eq. (20), (22), (26)-(32) | `src/oap/compute_moap_analytical_series.m`, `src/oap/compute_refined_T_pdf.m` |
 | Peak position, FWHM and HWHM | `src/oap/profile_fwhm.m` |
 | Spectra versus B/T/L/E/Nd/alpha/U0 | `src/core/run_parameter_sweep.m` |
 | Article-[6]-style plots | `src/plot/*.m` |

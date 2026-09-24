@@ -41,9 +41,12 @@ Processing Toolbox.
 
 - `direct_q_integral`: mặc định, ổn định hơn và tính trực tiếp trước phép
   khai triển Taylor-Maclaurin.
-- `analytical_series`: đối chiếu PT. (5)/(7), dùng tổng hữu hạn theo s và
-  eta; không nên dùng làm kết quả cuối nếu chưa kiểm tra hội tụ theo cả
-  hai chỉ số.
+- `analytical_series` (alias `analytic_series`): theo PDF Refined, dùng
+  PT. (28) và tổng hữu hạn PT. (32) theo `s_max`, `v_max`.
+  `series.evaluation='auto'` đối chiếu chuỗi với tích phân; `'quadrature'`
+  chỉ tính tích phân; `'series'` báo lỗi cụ thể nếu điều kiện Fermi,
+  D khác 0 hoặc kiểm tra sai số không thỏa. Xem
+  `ANALYTICAL_SERIES_REFINED_AUDIT.md` về giới hạn và quy ước công thức.
 
 ## 5. Kiểm tra hội tụ cần thực hiện cho bài báo
 

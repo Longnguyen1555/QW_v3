@@ -43,7 +43,7 @@ cfg.fields.E_kVcm         = 0.0;
 cfg.temperature_K         = 90.0;
 
 % Transition indices are MATLAB 1-based subband indices.
-cfg.oap.model             = 'direct_q_integral'; % analytical_series/direct_q_integral
+cfg.oap.model             = 'analytical_series'; % analytical_series/direct_q_integral
 cfg.oap.transitions       = [1 2];
 cfg.oap.photon_orders     = [1 2];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
@@ -53,8 +53,8 @@ cfg.oap.photon_energy_meV = 2.0:0.01:250.0;
 % Sweep used by 'sweep_spectra' and 'linewidth_sweep'
 % Supported names: 'B_T', 'T_K', 'Lz_nm', 'E_kVcm',
 %                  'Nd_sheet_cm2', 'alpha', 'U0_meV'
-cfg.sweep.parameter       = 'B_T';
-cfg.sweep.values          = 50.0:20.0:300.0;
+cfg.sweep.parameter       = 'T_K';
+cfg.sweep.values          = 3.0:10.0:300.0;
 
 % Output
 cfg.output.directory      = fullfile(project_root, 'results');

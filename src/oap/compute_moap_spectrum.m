@@ -4,7 +4,7 @@ function spectrum = compute_moap_spectrum(sp, td, cfg)
     switch lower(cfg.oap.model)
         case 'direct_q_integral'
             spectrum = compute_moap_direct(sp, td, cfg);
-        case 'analytical_series'
+        case {'analytical_series','analytic_series'}
             spectrum = compute_moap_analytical_series(sp, td, cfg);
         case 'direct_t'
             spectrum = compute_moap_pdf_direct(sp, td, cfg);

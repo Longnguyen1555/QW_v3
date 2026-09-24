@@ -91,12 +91,10 @@ function cfg = default_config()
     cfg.oap.direct.RelTol = 1.0e-9;
     cfg.oap.direct.AbsTol = 0.0;
 
-    cfg.oap.series.s_max = 8;
-    cfg.oap.series.eta_max = 5;
-    cfg.oap.series.v_max = 20;
-    cfg.oap.series.enforce_fermi_condition = true;
+    cfg.oap.series.s_max = 8;   % PDF screening index s = 0:s_max
+    cfg.oap.series.v_max = 20;  % PDF Fermi index v = 1:v_max
+    cfg.oap.series.evaluation = 'auto'; % series = checked Eq. (32), quadrature = Eq. (28)
     cfg.oap.normalization_area_m2 = 1.0;
-    cfg.oap.series.piezo_effective_q_mode = 'debye';
 
     %% Sweep
     cfg.sweep.parameter = 'B_T';

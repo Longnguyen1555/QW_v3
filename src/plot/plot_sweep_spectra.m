@@ -301,6 +301,14 @@ function fig = plot_sweep_spectra(cases, labels, cfg, mechanism)
     x_active_all = ...
         [];
 
+    if isfield(cfg.oap,'plot_full_energy_range') && ...
+            cfg.oap.plot_full_energy_range
+        for i = 1:n_cases
+            Ei = Ecell{i};
+            x_active_all = [x_active_all; Ei(isfinite(Ei))]; %#ok<AGROW>
+        end
+    end
+
     y_all = ...
         [];
 

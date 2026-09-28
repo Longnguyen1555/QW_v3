@@ -1,6 +1,6 @@
 function U = anharmonic_potential(z, cfg)
-%ANHARMONIC_POTENTIAL Target-paper confinement potential.
-% U_A(z) = U0 (z/Lz)^2 [alpha (z/Lz)^6 - 1].
+%ANHARMONIC_POTENTIAL Manning confinement in PDF Eq. (1).
+% U_A(z) = nu*U0*[sech(z/Lz)^4 - sech(z/Lz)^2].
 
     c = cfg.constants;
     Lz = cfg.structure.Lz_nm * c.nm;

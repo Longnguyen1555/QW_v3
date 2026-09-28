@@ -47,6 +47,14 @@ function results = run_qw_moap(cfg)
 
 
         % ============================================================
+        % LOWEST-SUBBAND ENERGY-GAP SWEEP
+        % ============================================================
+        case 'energy_gap_sweep'
+
+            results.energy_gap = run_energy_gap_sweep(cfg);
+
+
+        % ============================================================
         % ALL DEMO
         % ============================================================
         case 'all_demo'

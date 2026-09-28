@@ -183,12 +183,19 @@ function fig = plot_moap_spectrum(spectrum, cfg, tag, mechanism)
     end
 
 
+    full_energy_range = isfield(cfg.oap,'plot_full_energy_range') && ...
+        cfg.oap.plot_full_energy_range;
+
     P_abs = abs(P_valid);
 
     Pmax = max(P_abs);
 
 
-    if isfinite(Pmax) && Pmax > 0
+    if full_energy_range && max(E_valid) > min(E_valid)
+
+        xlim(ax, [min(E_valid) max(E_valid)]);
+
+    elseif isfinite(Pmax) && Pmax > 0
 
         % Small enough to retain weak satellite / multiphoton peaks,
         % but large enough to remove negligible Lorentzian tails.

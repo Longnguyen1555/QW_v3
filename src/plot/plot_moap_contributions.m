@@ -112,6 +112,10 @@ function fig = plot_moap_contributions(spectrum, cfg, tag, mechanism)
     %  weaker than 1PA but still physically relevant.
     % =====================================================================
     x_active_all = [];
+    if isfield(cfg.oap,'plot_full_energy_range') && ...
+            cfg.oap.plot_full_energy_range
+        x_active_all = E(isfinite(E));
+    end
 
     y_all = [];
 

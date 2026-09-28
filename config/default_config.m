@@ -50,8 +50,9 @@ function cfg = default_config()
     %% Schrodinger-Poisson controls
     cfg.sp.max_outer = 100;
     cfg.sp.max_inner = 500;
-    cfg.sp.mix = 0.50;
+    cfg.sp.mix = 0.40; % stable PDF fixed-point mixing for configured subbands
     cfg.sp.tol_VH_meV = 1.0e-3;
+    cfg.sp.tol_VH_relative = 1.0e-3; % PDF relative U_H iteration criterion
     cfg.sp.tol_EF_meV = 1.0e-3;
     cfg.sp.poisson_boundary = 'dirichlet_zero';
 
@@ -88,12 +89,20 @@ function cfg = default_config()
     cfg.oap.active_thickness_nm = 10.0;
 
     cfg.oap.plot_normalization = 'none';
+    % Keep the complete configured photon-energy interval on spectrum plots.
+    % This is required when a resonance lies on the negative-energy branch.
+    cfg.oap.plot_full_energy_range = true;
     cfg.oap.direct.RelTol = 1.0e-9;
     cfg.oap.direct.AbsTol = 0.0;
 
-    cfg.oap.series.s_max = 8;   % PDF screening index s = 0:s_max
-    cfg.oap.series.v_max = 20;  % PDF Fermi index v = 1:v_max
+    % Largest verified truncations below 200.  s_max and v_max remain finite
+    % at 199 in the Refined checks; Nhan overflows at eta=18 for a valid
+    % D>0 fixture, so eta_max=17 is the largest finite verified value.
+    cfg.oap.series.s_max = 199;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
+    cfg.oap.series.eta_max = 17;  % HƯỚNG DẪN screening-series index eta
+    cfg.oap.series.v_max = 199;   % Refined PDF Fermi index v = 1:v_max
     cfg.oap.series.evaluation = 'auto'; % series = checked Eq. (32), quadrature = Eq. (28)
+    cfg.oap.series.enforce_fermi_condition = true;
     cfg.oap.normalization_area_m2 = 1.0;
 
     %% Sweep

@@ -54,12 +54,8 @@ function spectrum = compute_moap_van(sp, td, cfg)
 
         % hbar Omega = photon energy
         Omega = Eph / hbar;
-
-        % Source formula:
-        % a0 = e E0 / (me Omega^2)
         a0 = cfg.laser.a0_nm*c.nm;
 
-        spectrum.meta.Omega_rad_s(iE) = Omega;
         spectrum.meta.a0_m(iE) = a0;
 
         P0_LO = E0^4 * e^4 * me^2 * omega0 * S * sqrt(kappa0) / (256.0 * pi^3 * hbar^6 * eps0 * kappa_LO * Omega^2);

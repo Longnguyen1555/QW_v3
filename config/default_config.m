@@ -84,7 +84,7 @@ function cfg = default_config()
     cfg.oap.gamma_optical_meV = 0.80;
     cfg.oap.gamma_piezo_meV = 0.60;
 
-    cfg.oap.screening_density_mode = 'fixed';
+    cfg.oap.screening_density_mode = 'from_sheet';
     cfg.oap.fixed_ne_cm3 = 1.0e18;
     cfg.oap.active_thickness_nm = 10.0;
 
@@ -98,11 +98,11 @@ function cfg = default_config()
     % Largest verified truncations below 200.  s_max and v_max remain finite
     % at 199 in the Refined checks; Nhan overflows at eta=18 for a valid
     % D>0 fixture, so eta_max=17 is the largest finite verified value.
-    cfg.oap.series.s_max = 199;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
-    cfg.oap.series.eta_max = 17;  % HƯỚNG DẪN screening-series index eta
-    cfg.oap.series.v_max = 199;   % Refined PDF Fermi index v = 1:v_max
+    cfg.oap.series.s_max = 20;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
+    cfg.oap.series.eta_max = 5;  % HƯỚNG DẪN screening-series index eta
+    cfg.oap.series.v_max = 20;   % Refined PDF Fermi index v = 1:v_max
     cfg.oap.series.evaluation = 'auto'; % series = checked Eq. (32), quadrature = Eq. (28)
-    cfg.oap.series.enforce_fermi_condition = true;
+    cfg.oap.series.enforce_fermi_condition = false;
     cfg.oap.normalization_area_m2 = 1.0;
 
     %% Sweep

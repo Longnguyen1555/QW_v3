@@ -92,15 +92,25 @@ function cfg = default_config()
     % Keep the complete configured photon-energy interval on spectrum plots.
     % This is required when a resonance lies on the negative-energy branch.
     cfg.oap.plot_full_energy_range = true;
-    cfg.oap.direct.RelTol = 1.0e-9;
-    cfg.oap.direct.AbsTol = 0.0;
+    % Physical Eq. (19) cutoffs in nm^-1; the kernel divides them by qd.
+    cfg.oap.direct.optical.qperp_bounds_inv_nm = [0 20];
+    cfg.oap.direct.optical.qperp_step_inv_nm = 0.1;
+    cfg.oap.direct.optical.qz_bounds_inv_nm = [-20 20];
+    cfg.oap.direct.optical.qz_step_inv_nm = 1.0;
+    cfg.oap.direct.optical.u_block_size = 128;
+    % Physical Eq. (25) cutoffs in nm^-1.  The signed qz convention and
+    % full-vector q=sqrt(qperp^2+qz^2) match the modified Eq. (19).
+    cfg.oap.direct.piezo.qperp_bounds_inv_nm = [0 20];
+    cfg.oap.direct.piezo.qperp_step_inv_nm = 0.1;
+    cfg.oap.direct.piezo.qz_bounds_inv_nm = [-20 20];
+    cfg.oap.direct.piezo.qz_step_inv_nm = 1.0;
+    cfg.oap.direct.piezo.u_block_size = 128;
+    cfg.oap.direct.trapz.form_factor.z_bounds_nm     = []; % full z range
+    cfg.oap.direct.trapz.form_factor.z_step_nm       = []; % native z grid
 
-    % Largest verified truncations below 200.  s_max and v_max remain finite
-    % at 199 in the Refined checks; Nhan overflows at eta=18 for a valid
-    % D>0 fixture, so eta_max=17 is the largest finite verified value.
-    cfg.oap.series.s_max = 20;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
+    cfg.oap.series.s_max = 99;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
     cfg.oap.series.eta_max = 5;  % HƯỚNG DẪN screening-series index eta
-    cfg.oap.series.v_max = 20;   % Refined PDF Fermi index v = 1:v_max
+    cfg.oap.series.v_max = 99;   % Refined PDF Fermi index v = 1:v_max
     cfg.oap.series.evaluation = 'auto'; % series = checked Eq. (32), quadrature = Eq. (28)
     cfg.oap.series.enforce_fermi_condition = false;
     cfg.oap.normalization_area_m2 = 1.0;

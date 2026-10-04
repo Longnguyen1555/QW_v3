@@ -4,6 +4,11 @@ function test_full_pipeline()
     cfg.output.save_csv = false;
     cfg.output.save_mat = false;
     cfg.run.task = 'single';
+    % Exercise the direct Eq. (19)/(25) route without turning this smoke
+    % test into a dense adaptive-quadrature production run.
+    cfg.oap.model = 'direct_q_integral';
+    cfg.oap.photon_energy_meV = 40;
+    cfg.oap.photon_orders = 1;
 
     sp = solve_schrodinger_poisson(cfg);
     td = compute_transition_data(sp,cfg);

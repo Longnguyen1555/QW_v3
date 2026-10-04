@@ -11,6 +11,7 @@ function run_all_tests()
     test_charge_neutrality();
     test_sp_pdf_consistency();
     test_resonance_positions();
+    test_direct_pdf_equations();
     test_refined_analytical_series();
     test_moap_nhan();
     test_energy_gap_sweep();

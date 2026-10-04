@@ -3,6 +3,9 @@ function test_resonance_positions()
 % (DeltaE +/- hbar*omega_LO)/ell within Lorentzian/grid tolerance.
 
     cfg = apply_numerical_profile(default_config(),'quick');
+    % This regression checks Lorentzian peak centers specifically.  Keep it
+    % on that kernel now that direct_q_integral has its own PDF quadrature.
+    cfg.oap.model = 'lorentzian';
     cfg.oap.mechanisms = {'optical'};
     cfg.oap.photon_orders = [1 2];
     sp = solve_schrodinger_poisson(cfg);

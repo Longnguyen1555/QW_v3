@@ -1,8 +1,8 @@
 Mechanism,PhotonOrder,Process,Peak_meV,FWHM_meV,HWHM_meV
-optical,1,emission,20,NaN,NaN
-optical,1,absorption,20,NaN,NaN
-optical,2,emission,20,NaN,NaN
-optical,2,absorption,20,NaN,NaN
+optical,1,emission,107.61,81.8329299817998,40.9164649908999
+optical,1,absorption,1,NaN,NaN
+optical,2,emission,53.8,40.9279505930722,20.4639752965361
+optical,2,absorption,1,NaN,NaN
 piezoelectric,1,emission,NaN,NaN,NaN
 piezoelectric,1,absorption,NaN,NaN,NaN
 piezoelectric,2,emission,NaN,NaN,NaN

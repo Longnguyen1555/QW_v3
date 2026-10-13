@@ -70,9 +70,9 @@ function cfg = default_config()
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
 
-    % q integration: q is in nm^-1 at the user level
+    % q integration: q is in um^-1 at the user level
     cfg.oap.qz_max_inv_nm = 2.5;
-    cfg.oap.qperp_max_inv_nm = 1.5;
+    cfg.oap.qperp_max_inv_nm = 3.5;
     cfg.oap.Nqz = 90;
     cfg.oap.Nqperp = 90;
 
@@ -93,20 +93,6 @@ function cfg = default_config()
     % This is required when a resonance lies on the negative-energy branch.
     cfg.oap.plot_full_energy_range = true;
     % Physical Eq. (19) cutoffs in nm^-1; the kernel divides them by qd.
-    cfg.oap.direct.optical.qperp_bounds_inv_nm = [0 20];
-    cfg.oap.direct.optical.qperp_step_inv_nm = 0.1;
-    cfg.oap.direct.optical.qz_bounds_inv_nm = [-20 20];
-    cfg.oap.direct.optical.qz_step_inv_nm = 1.0;
-    cfg.oap.direct.optical.u_block_size = 128;
-    % Physical Eq. (25) cutoffs in nm^-1.  The signed qz convention and
-    % full-vector q=sqrt(qperp^2+qz^2) match the modified Eq. (19).
-    cfg.oap.direct.piezo.qperp_bounds_inv_nm = [0 20];
-    cfg.oap.direct.piezo.qperp_step_inv_nm = 0.1;
-    cfg.oap.direct.piezo.qz_bounds_inv_nm = [-20 20];
-    cfg.oap.direct.piezo.qz_step_inv_nm = 1.0;
-    cfg.oap.direct.piezo.u_block_size = 128;
-    cfg.oap.direct.trapz.form_factor.z_bounds_nm     = []; % full z range
-    cfg.oap.direct.trapz.form_factor.z_step_nm       = []; % native z grid
 
     cfg.oap.series.s_max = 99;   % screening index s = 0:s_max (van), 1:s_max (Nhan)
     cfg.oap.series.eta_max = 5;  % HƯỚNG DẪN screening-series index eta

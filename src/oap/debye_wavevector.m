@@ -16,6 +16,5 @@ function [qd, ne3d] = debye_wavevector(sp, cfg)
             error('Unknown screening_density_mode.');
     end
 
-    qd = sqrt(max(ne3d,0) * c.e^2 / ...
-        (cfg.material.eps_static*c.eps0*c.kB*cfg.temperature_K));
+    qd = sqrt(max(ne3d,0) * c.e^2 / (cfg.material.eps_static*c.eps0*c.kB*cfg.temperature_K));
 end

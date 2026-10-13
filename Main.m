@@ -1,4 +1,3 @@
-
 clear; clc; close all;
 
 project_root = fileparts(mfilename('fullpath'));
@@ -22,21 +21,21 @@ cfg.run.task = 'single';
 cfg = apply_numerical_profile(cfg, 'standard');
 
 % Main physical parameters
-cfg.structure.Lz_nm       = 10.0;
+cfg.structure.Lz_nm       = 15.0;
 cfg.structure.U0_meV      = 228.0;
-cfg.doping.Nd_sheet_cm2   = 1.0e13;
+cfg.doping.Nd_sheet_cm2   = 1.0e11;
 cfg.fields.B_T            = 5.0;
 cfg.fields.E_kVcm         = 25.0;
-cfg.temperature_K         = 10.0;
+cfg.temperature_K         = 50.0;
 
 % Transition indices are MATLAB 1-based subband indices.
-cfg.oap.model             = 'direct_approx'; %lorentzian, van, nhan, direct_q_integral
+cfg.oap.model             = 'nhan'; %lorentzian, van, nhan, direct_q_integral
 cfg.oap.transitions       = [1 2];
 cfg.oap.photon_orders     = [1 2];
 cfg.oap.mechanisms        = {'optical', 'piezoelectric'};%'optical', 'piezoelectric'
 
 % Photon-energy scan
-cfg.oap.photon_energy_meV = 20.0:0.01:300.0;
+cfg.oap.photon_energy_meV = 55.0:0.00001:60.0;
 
 % Sweep used by 'sweep_spectra', 'linewidth_sweep', and 'energy_gap_sweep'.
 % For the energy-gap task, B_T may be changed to T_K, Lz_nm, E_kVcm,
@@ -47,7 +46,7 @@ cfg.sweep.parameter       = 'T_K';
 cfg.sweep.values          = [10 20 30];
 
 % Output
-cfg.output.directory      = fullfile(project_root, 'results_approx');%results_van, results_nhan, results_lorentzian
+cfg.output.directory      = fullfile(project_root, 'results_nhan');%results_van, results_nhan, results_lorentzian
 cfg.output.save_figures   = true;
 cfg.output.save_csv       = true;
 cfg.output.save_mat       = true;

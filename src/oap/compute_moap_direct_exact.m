@@ -1,4 +1,4 @@
-function spectrum = compute_moap_direct(sp, td, cfg)
+function spectrum = compute_moap_direct_exact(sp, td, cfg)
 %COMPUTE_MOAP_DIRECT Direct optical and exact-acoustic piezo kernels.
     c = cfg.constants;
     hbar = c.hbar;

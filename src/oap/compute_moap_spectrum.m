@@ -7,7 +7,7 @@ function spectrum = compute_moap_spectrum(sp, td, cfg)
         case 'lorentzian'
             spectrum = compute_moap_lorentzian(sp, td, cfg);
         case 'direct_exact'
-            spectrum = compute_moap_direct(sp, td, cfg);
+            spectrum = compute_moap_direct_exact(sp, td, cfg);
         case 'direct_approx'
             spectrum = compute_moap_direct_approx(sp, td, cfg);
         case {'van','analytical_series','analytic_series'}

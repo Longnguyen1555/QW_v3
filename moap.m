@@ -6,7 +6,7 @@ function results = moap(cfg)
         cfg.run.task = 'single';
         cfg.structure.Lz_nm       = 15.0;
         cfg.structure.U0_meV      = 228.0;
-        cfg.doping.Nd_sheet_cm2   = 1.0e11;
+        cfg.doping.Nd_sheet_cm2   = 1.0e13;
         cfg.fields.B_T            = 5.0;
         cfg.fields.E_kVcm         = 25.0;
         cfg.temperature_K         = 50.0;
@@ -14,7 +14,7 @@ function results = moap(cfg)
         cfg.oap.transitions       = [1 2];
         cfg.oap.photon_orders     = [1 2];
         cfg.oap.mechanisms        = {'optical', 'piezoelectric'};
-        cfg.oap.photon_energy_meV = 1.0:0.01:400.0;
+        cfg.oap.photon_energy_meV = 5.0:0.01:150.0;
         cfg.output.directory      = fullfile(project_root, 'results_approx');
         cfg.output.save_figures   = true;
         cfg.output.save_csv       = true;
@@ -84,10 +84,10 @@ function cfg = default_config()
     cfg.oap.photon_energy_meV = 7.5:0.01:100.0;
     cfg.oap.population_mode = 'maxwell_boltzmann';
     cfg.oap.include_pauli_blocking = false;
-    cfg.oap.qz_max_inv_nm = 50;
-    cfg.oap.qperp_max_inv_nm = 50;
-    cfg.oap.Nqz = 100;
-    cfg.oap.Nqperp = 100;
+    cfg.oap.qz_max_inv_nm = 2.0;
+    cfg.oap.qperp_max_inv_nm = 2.0;
+    cfg.oap.Nqz = 401;
+    cfg.oap.Nqperp = 401;
     cfg.oap.inplane_factor = 'none';
     cfg.oap.landau_initial = 0;
     cfg.oap.landau_final = 0;
@@ -573,17 +573,43 @@ function spectrum = compute_moap_direct_approx(sp, td, cfg)
     spectrum.total_raw = spectrum.mechanism.optical.total_raw + spectrum.mechanism.piezoelectric.total_raw;
     spectrum = normalize_spectrum_for_plot(spectrum, cfg);
 end
-function Tval = compute_T_qspace(eps_alpha,EF,D,ell,qd,qperp,qz, I2_qz,cfg)
-% Composite trapz in physical q space: qz first, then qperp.
+
+
+function Tval = compute_T_qspace( ...
+    eps_alpha, EF, D, ell, qd, qperp, qz, I2_qz, cfg)
+
     c = cfg.constants;
-    me = cfg.material.mstar_rel*c.m0;
-    E_qperp = c.hbar^2*qperp.^2/(2*me);
-    epsilon_star = eps_alpha + D/2 + (me * D^2)./(2*c.hbar^2*qperp.^2);
-    occupation = 1./(1+exp((epsilon_star-EF)/(c.kB*cfg.temperature_K)));
-    q2 = qperp.^2+qz.^2;
-    integrand = q2.^(ell+0.5)./(q2+qd^2).^2 .* abs(E_qperp+D).*occupation.*I2_qz;
-    Tval = trapz(qperp,trapz(qz,integrand,1),2);
+    me = cfg.material.mstar_rel * c.m0;
+    kBT = c.kB * cfg.temperature_K;
+
+    % Loai diem q_perp = 0 de tranh 0/0
+    q = qperp(:).';
+    q = q(q > 0);
+
+    qz = qz(:);
+    I2_qz = I2_qz(:);
+
+    % Nang luong giat lui
+    Eq = c.hbar^2 * q.^2 / (2*me);
+
+    % Nang luong dung tai nghiem delta
+    Estar = eps_alpha + (Eq + D).^2 ./ (4*Eq);
+
+    % Fermi-Dirac on dinh so hoc
+    x = (Estar - EF) / kBT;
+    F = exp(-max(x,0)) ./ (1 + exp(-abs(x)));
+
+    % Tich phan theo q_z
+    Q2 = qz.^2 + q.^2;
+    K = Q2.^(ell + 0.5) ./ (Q2 + qd^2).^2;
+    K = K .* I2_qz;
+
+    Wq = trapz(qz, K, 1);
+
+    % Tich phan theo q_perp
+    Tval = trapz(q, Wq .* abs(Eq + D) .* F);
 end
+
 function [qd, ne3d] = debye_wavevector(sp, cfg)
 %DEBYE_WAVEVECTOR qd^2 = ne e^2/(eps_s eps0 kBT).
     c = cfg.constants;

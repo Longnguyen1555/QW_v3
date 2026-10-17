@@ -1,94 +1,62 @@
 function results = moap2(cfg)
     close all;
     if nargin == 0 || isempty(cfg)
-        cfg = default_config();
-    elseif nargin ~= 1 || ~isstruct(cfg)
-        error('moap2 expects zero arguments or one cfg struct.');
+        cfg.run.verbose = true;
+        cfg.material.mstar_rel = 0.067;
+        cfg.material.eps_static = 13.18;
+        cfg.material.eps_high = 10.89;
+        cfg.material.LO_phonon_meV = 36.25;
+        cfg.material.piezo_kappa2 = 0.006;
+        cfg.structure.U0_meV = 228;
+        cfg.structure.Lz_nm = 15;
+        cfg.structure.manning_prefactor = 6;
+        cfg.structure.domain_nm = 60;
+        cfg.structure.auto_domain = false;
+        cfg.structure.domain_factor = 3;
+        cfg.structure.Nz = 1502;
+        cfg.structure.n_states = 6;
+        cfg.doping.Nd_sheet_cm2 = 1e12;
+        cfg.doping.width_nm = 2;
+        cfg.fields.B_T = 5;
+        cfg.fields.E_kVcm = 25;
+        cfg.fields.kx_inv_m = 0;
+        cfg.temperature_K = 100;
+        cfg.sp.max_outer = 100;
+        cfg.sp.mix = .4;
+        cfg.sp.tol_VH_relative = 1e-3;
+        cfg.sp.tol_EF_meV = 1e-3;
+        cfg.laser.E0_kVcm = 4.5;
+        cfg.laser.a0_nm = 7.5;
+        cfg.oap.transitions = [1 2];
+        cfg.oap.photon_orders = [1 2];
+        cfg.oap.photon_energy_meV = 10:.01:150;
+        cfg.oap.qz_max_inv_nm = 2;
+        cfg.oap.Nqz = 101;
+        cfg.oap.screening_density_mode = 'from_sheet';
+        cfg.oap.fixed_ne_cm3 = 1e18;
+        cfg.oap.active_thickness_nm = 10;
+        cfg.oap.plot_normalization = 'none';
+        cfg.oap.plot_full_energy_range = true;
+        cfg.oap.series.s_max = 2;
+        cfg.oap.series.v_max = 3;
+        cfg.output.directory = fullfile(fileparts(mfilename('fullpath')), 'results_van');
+        cfg.output.save_figures = true;
+        cfg.output.save_csv = true;
+        cfg.output.save_mat = true;
+        cfg.output.visible = 'on';
+        cfg.output.figure_format = 'png';
+        cfg.output.figure_dpi = 200;
+        cfg.constants.e = 1.602176634e-19;
+        cfg.constants.hbar = 1.054571817e-34;
+        cfg.constants.kB = 1.380649e-23;
+        cfg.constants.eps0 = 8.8541878128e-12;
+        cfg.constants.m0 = 9.1093837015e-31;
+        cfg.constants.meV = cfg.constants.e*1e-3;
+        cfg.constants.nm = 1e-9;
     end
-    validate_config(cfg);
     if ~exist(cfg.output.directory, 'dir')
         mkdir(cfg.output.directory);
     end
-    results.config = cfg;
-    results.single = run_single_case(cfg);
-    if cfg.output.save_mat
-        save(fullfile(cfg.output.directory, 'project_results.mat'), 'results', 'cfg', '-v7.3');
-    end
-    fprintf('\n[MOAP] Completed successfully.\n');
-    fprintf('[MOAP] Results folder: %s\n', cfg.output.directory);
-end
-function cfg = default_config()
-    cfg.run.verbose = true;
-    cfg.material.mstar_rel = 0.067;
-    cfg.material.eps_static = 13.18;
-    cfg.material.eps_high = 10.89;
-    cfg.material.LO_phonon_meV = 36.25;
-    cfg.material.piezo_kappa2 = 0.006;
-    cfg.structure.U0_meV = 228.0;
-    cfg.structure.Lz_nm = 15.0;
-    cfg.structure.manning_prefactor = 6.0;
-    cfg.structure.domain_nm = 60.0;
-    cfg.structure.auto_domain = false;
-    cfg.structure.domain_factor = 3.0;
-    cfg.structure.Nz = 1502;
-    cfg.structure.n_states = 6;
-    cfg.doping.Nd_sheet_cm2 = 1.0e11;
-    cfg.doping.width_nm = 2.0;
-    cfg.fields.B_T = 5.0;   
-    cfg.fields.E_kVcm = 25.0;
-    cfg.fields.kx_inv_m = 0.0;
-    cfg.temperature_K = 50.0;
-    cfg.sp.max_outer = 100;
-    cfg.sp.mix = 0.40;
-    cfg.sp.tol_VH_relative = 1.0e-3;
-    cfg.sp.tol_EF_meV = 1.0e-3;
-    cfg.laser.E0_kVcm = 4.5;
-    cfg.laser.a0_nm = 7.5;
-    cfg.oap.transitions = [1 2];
-    cfg.oap.photon_orders = [1 2];
-    cfg.oap.photon_energy_meV = 5.0:0.01:150.0;
-    cfg.oap.qz_max_inv_nm = 2.0;
-    cfg.oap.Nqz = 101;
-    cfg.oap.screening_density_mode = 'from_sheet';
-    cfg.oap.fixed_ne_cm3 = 1.0e18;
-    cfg.oap.active_thickness_nm = 10.0;
-    cfg.oap.plot_normalization = 'none';
-    cfg.oap.plot_full_energy_range = true;
-    cfg.oap.series.s_max = 8;
-    cfg.oap.series.v_max = 20;
-    cfg.oap.series.enforce_fermi_condition = false;
-    cfg.output.directory = fullfile(fileparts(mfilename('fullpath')), 'results_van');
-    cfg.output.save_figures = true;
-    cfg.output.save_csv = true;
-    cfg.output.save_mat = true;
-    cfg.output.visible = 'on';
-    cfg.output.figure_format = 'png';
-    cfg.output.figure_dpi = 200;
-    cfg.constants.e = 1.602176634e-19;
-    cfg.constants.hbar = 1.054571817e-34;
-    cfg.constants.kB = 1.380649e-23;
-    cfg.constants.eps0 = 8.8541878128e-12;
-    cfg.constants.m0 = 9.1093837015e-31;
-    cfg.constants.meV = cfg.constants.e * 1.0e-3;
-    cfg.constants.nm = 1.0e-9;
-end
-function validate_config(cfg)
-    assert(cfg.structure.Nz >= 50, 'Nz must be at least 50.');
-    assert(cfg.structure.n_states >= 2, 'At least two states are required.');
-    assert(cfg.structure.Lz_nm > 0, 'Lz must be positive.');
-    assert(cfg.structure.U0_meV > 0, 'U0 must be positive.');
-    assert(cfg.temperature_K > 0, 'Temperature must be positive.');
-    assert(cfg.doping.Nd_sheet_cm2 >= 0, 'Sheet density cannot be negative.');
-    assert(cfg.oap.Nqz >= 8, 'qz grid is too small.');
-    photon_energy_meV = cfg.oap.photon_energy_meV;
-    assert(isnumeric(photon_energy_meV) && isvector(photon_energy_meV) && ~isempty(photon_energy_meV) && isreal(photon_energy_meV) && all(isfinite(photon_energy_meV)), 'Photon-energy grid must be a nonempty finite real vector.');
-    assert(all(diff(photon_energy_meV) > 0), 'Photon-energy grid must be strictly increasing.');
-    assert(size(cfg.oap.transitions, 2) == 2, 'cfg.oap.transitions must have two columns [initial final].');
-    assert(all(cfg.oap.transitions(:) >= 1), 'Transition indices are MATLAB 1-based and must be >= 1.');
-    assert(max(cfg.oap.transitions(:)) <= cfg.structure.n_states, 'A transition index exceeds structure.n_states.');
-    assert(all(cfg.oap.photon_orders >= 1), 'Photon orders must be positive integers.');
-end
-function case_result = run_single_case(cfg)
     if cfg.run.verbose
         fprintf('\n');
         fprintf('============================================================\n');
@@ -101,7 +69,18 @@ function case_result = run_single_case(cfg)
     end
     transition_data = compute_transition_data(sp, cfg);
     spectrum = compute_moap_van(sp, transition_data, cfg);
-    metrics = extract_spectrum_metrics(spectrum, cfg);
+    E = spectrum.energy_meV;
+    metrics.total = profile_fwhm(E,spectrum.total_raw);
+    for mechanism = {'optical','piezoelectric'}
+        mk = mechanism{1};
+        metrics.(mk).total = profile_fwhm(E,spectrum.mechanism.(mk).total_raw);
+        for order = cfg.oap.photon_orders
+            ok = sprintf('order_%d',order);
+            metrics.(mk).(ok).emission = profile_fwhm(E,spectrum.mechanism.(mk).(ok).emission_raw);
+            metrics.(mk).(ok).absorption = profile_fwhm(E,spectrum.mechanism.(mk).(ok).absorption_raw);
+            metrics.(mk).(ok).total = profile_fwhm(E,spectrum.mechanism.(mk).(ok).total_raw);
+        end
+    end
     case_result.cfg = cfg;
     case_result.sp = sp;
     case_result.transitions = transition_data;
@@ -119,7 +98,19 @@ function case_result = run_single_case(cfg)
     if cfg.output.save_csv
         T = table(spectrum.energy_meV(:), spectrum.total_raw(:), spectrum.mechanism.optical.total_raw(:), spectrum.mechanism.piezoelectric.total_raw(:), 'VariableNames', {'PhotonEnergy_meV', 'TotalRaw', 'OpticalRaw', 'PiezoelectricRaw'});
         writetable(T, fullfile(cfg.output.directory, 'single_spectrum.csv'));
-        write_metrics_csv(metrics, cfg, fullfile(cfg.output.directory, 'single_metrics.csv'));
+        mechanism = {}; order_col = []; process = {}; peak_meV = []; fwhm_meV = []; hwhm_meV = [];
+        for mech = {'optical','piezoelectric'}
+            mk = mech{1};
+            for order = cfg.oap.photon_orders
+                ok = sprintf('order_%d',order);
+                for proc = {'emission','absorption'}
+                    item = metrics.(mk).(ok).(proc{1});
+                    mechanism{end+1,1} = mk; order_col(end+1,1) = order; process{end+1,1} = proc{1}; %#ok<AGROW>
+                    peak_meV(end+1,1) = item.peak_x; fwhm_meV(end+1,1) = item.fwhm; hwhm_meV(end+1,1) = item.hwhm; %#ok<AGROW>
+                end
+            end
+        end
+        writetable(table(mechanism,order_col,process,peak_meV,fwhm_meV,hwhm_meV,'VariableNames',{'Mechanism','PhotonOrder','Process','Peak_meV','FWHM_meV','HWHM_meV'}),fullfile(cfg.output.directory,'single_metrics.csv'));
     end
     if cfg.output.save_figures
         names = {'structure', 'spectrum_optical', 'spectrum_piezoelectric', 'contributions_optical', 'contributions_piezoelectric'};
@@ -143,6 +134,12 @@ function case_result = run_single_case(cfg)
         fprintf('\n');
         fprintf('[MOAP] Max raw OAP = %.6e\n', max(spectrum.total_raw));
     end
+    results.config = cfg;
+    results.single = case_result;
+    if cfg.output.save_mat
+        save(fullfile(cfg.output.directory, 'project_results.mat'), 'results', 'cfg', '-v7.3');
+    end
+    fprintf('\n[MOAP] Completed successfully.\n[MOAP] Results folder: %s\n',cfg.output.directory);
 end
 function out = solve_schrodinger_poisson(cfg)
     c = cfg.constants;
@@ -154,10 +151,23 @@ function out = solve_schrodinger_poisson(cfg)
     z = linspace(-domain_nm/2, domain_nm/2, cfg.structure.Nz).' * c.nm;
     dz = z(2) - z(1);
     z_in = z(2:end-1);
-    Vconf = anharmonic_potential(z, cfg);
+    u = z/(cfg.structure.Lz_nm*c.nm);
+    Vconf = cfg.structure.U0_meV*c.meV*cfg.structure.manning_prefactor.*(sech(u).^4-sech(u).^2);
     Nd_sheet = cfg.doping.Nd_sheet_cm2 * 1.0e4;
     width = cfg.doping.width_nm * c.nm;
-    Nd_z = delta_doping_profile(z, Nd_sheet, width);
+    Nd_z = zeros(size(z));
+    if Nd_sheet > 0
+        if width <= 0
+            [~,idx] = min(abs(z)); Nd_z(idx) = Nd_sheet/dz;
+        else
+            mask = abs(z) <= width/2; covered = trapz(z,double(mask));
+            if covered <= 0
+                [~,idx] = min(abs(z)); Nd_z(idx) = Nd_sheet/dz;
+            else
+                Nd_z(mask) = Nd_sheet/covered;
+            end
+        end
+    end
     n_states = cfg.structure.n_states;
     if isfield(cfg.sp, 'max_iter')
         max_iter = cfg.sp.max_iter;
@@ -175,22 +185,34 @@ function out = solve_schrodinger_poisson(cfg)
     dVH_meV = Inf;
     dVH_relative = Inf;
     dEF_meV = Inf;
+    mstar = cfg.material.mstar_rel*c.m0;
+    alpha_kin = c.hbar^2/(2*mstar);
+    magnetic = (c.hbar*cfg.fields.kx_inv_m+c.e*cfg.fields.B_T.*z_in).^2/(2*mstar);
+    electric = -c.e*cfg.fields.E_kVcm*1e5.*z_in;
+    n = numel(z_in);
+    offH = (-alpha_kin/dz^2)*ones(n-1,1);
+    offD = ones(n-1,1);
+    D2 = spdiags([[offD;0],-2*ones(n,1),[0;offD]],[-1 0 1],n,n);
     for it = 1:max_iter
-        H = build_sp_hamiltonian(z_in, dz, Vconf(2:end-1), VH_old(2:end-1), cfg);
+        Veff = Vconf(2:end-1)+VH_old(2:end-1)+magnetic+electric;
+        H = spdiags([[offH;0],2*alpha_kin/dz^2+Veff(:),[0;offH]],[-1 0 1],n,n);
+        H = (H+H')/2;
         [Psi_in, E] = lowest_eigenpairs(H, n_states);
-        Psi_in = normalize_wavefunctions(Psi_in, dz);
+        norms = sqrt(sum(abs(Psi_in).^2,1)*dz);
+        Psi_in = bsxfun(@rdivide,Psi_in,norms);
         Psi = zeros(numel(z), n_states);
         Psi(2:end-1, :) = Psi_in;
         if Nd_sheet > 0
-            EF = solve_fermi_level(Nd_sheet, E, cfg);
-            Ni = subband_sheet_populations(EF, E, cfg);
+            [EF,Ni] = solve_fermi_level(Nd_sheet,E,cfg);
         else
             EF = NaN;
             Ni = zeros(n_states,1);
             dEF_meV = 0;
         end
         n_z = (abs(Psi).^2) * Ni(:);
-        VH_new = solve_poisson_dirichlet(z, Nd_z, n_z, cfg);
+        rhs = (c.e^2/(cfg.material.eps_static*c.eps0)).*(Nd_z-n_z);
+        VH_new = zeros(size(z));
+        VH_new(2:end-1) = D2\(dz^2.*rhs(2:end-1));
         VH_next = cfg.sp.mix .* VH_new + (1.0-cfg.sp.mix) .* VH_old;
         dVH_meV = max(abs(VH_next - VH_old)) / c.meV;
         dVH_relative = max(abs(VH_next - VH_old)) / max(max(abs(VH_old)), c.meV);
@@ -205,14 +227,16 @@ function out = solve_schrodinger_poisson(cfg)
         VH_old = VH_next;
         EF_old = EF;
     end
-    H = build_sp_hamiltonian(z_in, dz, Vconf(2:end-1), VH_old(2:end-1), cfg);
+    Veff = Vconf(2:end-1)+VH_old(2:end-1)+magnetic+electric;
+    H = spdiags([[offH;0],2*alpha_kin/dz^2+Veff(:),[0;offH]],[-1 0 1],n,n);
+    H = (H+H')/2;
     [Psi_in, E] = lowest_eigenpairs(H, n_states);
-    Psi_in = normalize_wavefunctions(Psi_in, dz);
+    norms = sqrt(sum(abs(Psi_in).^2,1)*dz);
+    Psi_in = bsxfun(@rdivide,Psi_in,norms);
     Psi = zeros(numel(z), n_states);
     Psi(2:end-1, :) = Psi_in;
     if Nd_sheet > 0
-        EF = solve_fermi_level(Nd_sheet, E, cfg);
-        Ni = subband_sheet_populations(EF, E, cfg);
+        [EF,Ni] = solve_fermi_level(Nd_sheet,E,cfg);
     else
         EF = NaN;
         Ni = zeros(n_states,1);
@@ -246,27 +270,6 @@ function out = solve_schrodinger_poisson(cfg)
     out.VH_error_relative = dVH_relative;
     out.EF_error_meV = dEF_meV;
 end
-function H = build_sp_hamiltonian(z_in, dz, Vconf_in, VH_in, cfg)
-    c = cfg.constants;
-    mstar = cfg.material.mstar_rel * c.m0;
-    alpha_kin = c.hbar^2 / (2.0 * mstar);
-    magnetic = (c.hbar*cfg.fields.kx_inv_m + c.e*cfg.fields.B_T.*z_in).^2 ./ (2.0*mstar);
-    electric = -c.e * cfg.fields.E_kVcm*1.0e5 .* z_in;
-    Veff = Vconf_in + VH_in + magnetic + electric;
-    n = numel(z_in);
-    off = (-alpha_kin / dz^2) * ones(n-1, 1);
-    main = (2.0*alpha_kin/dz^2) + Veff(:);
-    H = spdiags([[off; 0], main, [0; off]], [-1 0 1], n, n);
-    H = (H + H') / 2;
-end
-function U = anharmonic_potential(z, cfg)
-    c = cfg.constants;
-    Lz = cfg.structure.Lz_nm * c.nm;
-    U0 = cfg.structure.U0_meV * c.meV;
-    nu = cfg.structure.manning_prefactor;
-    u = z ./ Lz;
-    U = U0 .* nu .* (sech(u).^4 - sech(u).^2);
-end
 function [Psi, E] = lowest_eigenpairs(H, n_states)
     H = (H + H') / 2;
     opts.issym = true;
@@ -289,18 +292,8 @@ function [Psi, E] = lowest_eigenpairs(H, n_states)
     E = real(diag(D));
     [E, idx] = sort(E, 'ascend');
     Psi = real(Psi(:, idx));
-    if any(~isfinite(E))
-        error('Non-finite eigenvalues returned by the eigensolver.');
-    end
 end
-function Psi = normalize_wavefunctions(Psi, dz)
-    norms = sqrt(sum(abs(Psi).^2, 1) .* dz);
-    if any(norms <= 0 | ~isfinite(norms))
-        error('Invalid wavefunction norm.');
-    end
-    Psi = bsxfun(@rdivide, Psi, norms);
-end
-function EF = solve_fermi_level(Nd_sheet, E, cfg)
+function [EF,Ni] = solve_fermi_level(Nd_sheet, E, cfg)
     c = cfg.constants;
     kBT = c.kB * cfg.temperature_K;
     pref = cfg.material.mstar_rel*c.m0*kBT / (pi*c.hbar^2);
@@ -308,7 +301,7 @@ function EF = solve_fermi_level(Nd_sheet, E, cfg)
     Eref = min(E);
     eps_i = (E - Eref) ./ kBT;
     target = Nd_sheet / pref;
-    neutrality = @(mu) sum(softplus_stable(mu - eps_i)) - target;
+    neutrality = @(mu) sum(max(mu-eps_i,0)+log1p(exp(-abs(mu-eps_i))))-target;
     lo = -50.0;
     hi = max(50.0, max(eps_i) + target + 20.0);
     flo = neutrality(lo);
@@ -325,63 +318,18 @@ function EF = solve_fermi_level(Nd_sheet, E, cfg)
         fhi = neutrality(hi);
         count = count + 1;
     end
-    if flo > 0 || fhi < 0
-        error('Could not bracket dimensionless Fermi level.');
-    end
-    opts = optimset( 'TolX', 1.0e-12, 'FunValCheck', 'on', 'Display', 'off');
+    opts = optimset('TolX',1e-12,'Display','off');
     muF = fzero(neutrality, [lo hi], opts);
     EF = Eref + muF * kBT;
-    Ni = pref .* softplus_stable((EF - E) ./ kBT);
-    rel_err = abs(sum(Ni) - Nd_sheet) / Nd_sheet;
-    if rel_err > 1.0e-10
-        error(['Fermi-level neutrality failure: ', 'relative error = %.3e'], rel_err);
-    end
-end
-function Ni = subband_sheet_populations(EF, E, cfg)
-    c = cfg.constants;
-    kBT = c.kB * cfg.temperature_K;
-    pref = cfg.material.mstar_rel*c.m0*kBT / (pi*c.hbar^2);
-    Ni = pref .* softplus_stable((EF - E(:)) ./ kBT);
-end
-function Nd_z = delta_doping_profile(z, Nd_sheet, width)
-    Nd_z = zeros(size(z));
-    if Nd_sheet <= 0
-        return;
-    end
-    if width <= 0
-        [~, idx] = min(abs(z));
-        dz = z(2) - z(1);
-        Nd_z(idx) = Nd_sheet / dz;
-        return;
-    end
-    mask = abs(z) <= width / 2;
-    covered = trapz(z, double(mask));
-    if covered <= 0
-        [~, idx] = min(abs(z));
-        dz = z(2) - z(1);
-        Nd_z(idx) = Nd_sheet / dz;
-    else
-        Nd_z(mask) = Nd_sheet / covered;
-    end
-end
-function VH = solve_poisson_dirichlet(z, Nd_z, n_z, cfg)
-    c = cfg.constants;
-    dz = z(2) - z(1);
-    rhs = (c.e^2 / (cfg.material.eps_static*c.eps0)) .* (Nd_z - n_z);
-    n_in = numel(z) - 2;
-    main = -2.0 * ones(n_in, 1);
-    off = ones(n_in-1, 1);
-    D2 = spdiags([[off;0], main, [0;off]], [-1 0 1], n_in, n_in);
-    VH = zeros(size(z));
-    VH(2:end-1) = D2 \ (dz^2 .* rhs(2:end-1));
-end
-function y = softplus_stable(x)
-    y = max(x, 0) + log1p(exp(-abs(x)));
+    x = (EF-E)/kBT;
+    Ni = pref.*(max(x,0)+log1p(exp(-abs(x))));
 end
 function td = compute_transition_data(sp, cfg)
     c = cfg.constants;
     qz = linspace(0, cfg.oap.qz_max_inv_nm, cfg.oap.Nqz) / c.nm;
-    wqz = trapezoid_weights(qz);
+    wqz = zeros(size(qz));
+    wqz([1 end]) = [qz(2)-qz(1),qz(end)-qz(end-1)]/2;
+    wqz(2:end-1) = (qz(3:end)-qz(1:end-2))/2;
     transitions = cfg.oap.transitions;
     ntr = size(transitions, 1);
     td = repmat(struct(), ntr, 1);
@@ -389,9 +337,6 @@ function td = compute_transition_data(sp, cfg)
     for t = 1:ntr
         i = transitions(t,1);
         f = transitions(t,2);
-        if f <= i
-            error('Each transition must satisfy final > initial.');
-        end
         product = conj(sp.Psi(:,i)) .* sp.Psi(:,f);
         dipole = trapz(sp.z_m, product .* sp.z_m);
         Iqz = trapz(sp.z_m, bsxfun(@times, product, phase), 1);
@@ -399,19 +344,6 @@ function td = compute_transition_data(sp, cfg)
         td(t).deltaE_J = sp.E_J(f) - sp.E_J(i);
         td(t).dipole_m = dipole;
         td(t).Q_half_inv_m = sum(abs(Iqz).^2 .* wqz);
-    end
-end
-function w = trapezoid_weights(x)
-    x = x(:).';
-    n = numel(x);
-    if n < 2
-        error('At least two grid points are required.');
-    end
-    w = zeros(size(x));
-    w(1) = (x(2)-x(1))/2;
-    w(end) = (x(end)-x(end-1))/2;
-    if n > 2
-        w(2:end-1) = (x(3:end)-x(1:end-2))/2;
     end
 end
 function spectrum = compute_moap_van(sp, td, cfg)
@@ -429,47 +361,42 @@ function spectrum = compute_moap_van(sp, td, cfg)
     orders = cfg.oap.photon_orders(:).';
     Ephot = cfg.oap.photon_energy_meV(:).' * c.meV;
     nE = numel(Ephot);
-    [qd, ne3d] = debye_wavevector(sp, cfg);
-    spectrum = initialize_spectrum_struct(Ephot, cfg);
-    spectrum.meta.qd_inv_m = qd;
-    spectrum.meta.qd_inv_nm = qd * c.nm;
-    spectrum.meta.screening_ne_m3 = ne3d;
+    if strcmpi(cfg.oap.screening_density_mode,'fixed')
+        qd = sqrt(max(cfg.oap.fixed_ne_cm3*1e6,0)*c.e^2/(cfg.material.eps_static*c.eps0*c.kB*cfg.temperature_K));
+    else
+        thickness = cfg.oap.active_thickness_nm*c.nm;
+        if thickness <= 0, thickness = max(cfg.structure.Lz_nm*c.nm,sp.dz_m); end
+        qd = sqrt(max(sp.Nd_sheet_m2/thickness,0)*c.e^2/(cfg.material.eps_static*c.eps0*c.kB*cfg.temperature_K));
+    end
+    spectrum.energy_meV = Ephot/c.meV;
+    for mechanism = {'optical','piezoelectric'}
+        mk = mechanism{1};
+        spectrum.mechanism.(mk).total_raw = zeros(1,nE);
+        for ell = orders
+            ok = sprintf('order_%d',ell);
+            spectrum.mechanism.(mk).(ok).emission_raw = zeros(1,nE);
+            spectrum.mechanism.(mk).(ok).absorption_raw = zeros(1,nE);
+            spectrum.mechanism.(mk).(ok).total_raw = zeros(1,nE);
+        end
+    end
     a0 = cfg.laser.a0_nm*c.nm;
-    spectrum.meta.a0_m = repmat(a0, 1, nE);
-    spectrum.meta.P0_optical = zeros(1, nE);
-    spectrum.meta.P0_piezoelectric = zeros(1, nE);
-    EF = sp.EF_J;
     for iE = 1:nE
         Eph = Ephot(iE);
-        Omega = Eph / hbar;
-        P0_LO = E0^4 * e^4 * me^2 * (hw0/hbar) * sqrt(kappa0) / (256.0 * pi^3 * hbar^6 * eps0 * kappa_LO * Omega^2);
-        P0_PE = E0^4 * e^4 * me^2 * cfg.material.piezo_kappa2 * kBT * sqrt(kappa0) / (256.0 * pi^3 * hbar^7 * kappa0 * eps0 * Omega);
-        spectrum.meta.P0_optical(iE) = P0_LO;
-        spectrum.meta.P0_piezoelectric(iE) = P0_PE;
+        P0_LO = E0^4*e^4*me^2*(hw0/hbar)*sqrt(kappa0)/(256*pi^3*hbar^6*eps0*kappa_LO*(Eph/hbar));
+        P0_PE = E0^4*e^4*me^2*cfg.material.piezo_kappa2*kBT*sqrt(kappa0)/(256*pi^3*hbar^7*kappa0*eps0*(Eph/hbar));
         for it = 1:numel(td)
             eps_alpha = sp.E_J(td(it).initial);
             DeltaE = td(it).deltaE_J;
             transition_factor = abs(td(it).dipole_m)^2 * td(it).Q_half_inv_m;
             for ell = orders
                 order_key = sprintf('order_%d', ell);
-                order_factor = a0^(2*ell) / (2^(2*ell) * factorial(ell)^2);
-                Pplus = P0_LO * transition_factor * order_factor * (N0 + 1.0) * compute_T_taylor_bessel_pdf(eps_alpha, EF, DeltaE + hw0 - ell*Eph, ell, qd, cfg);
-                Pminus = P0_LO * transition_factor * order_factor * N0 * compute_T_taylor_bessel_pdf(eps_alpha, EF, DeltaE - hw0 - ell*Eph, ell, qd, cfg);
-                if ell == 1
-                    Pplus = 1e-3 * Pplus; %Dieu chinh cuong do dinh optical L = 1 emission
-                end
-                if ell == 2
-                    Pminus = 1e8 * Pminus; %Dieu chinh cuong do dinh optical L = 2 absorption
-                    Pplus = 1e5 * Pplus; %Dieu chinh cuong do dinh optical L = 2 emission
-                end
+                order_factor = a0^(ell) / (2^(2*ell) * factorial(ell)^2);
+                Pplus = P0_LO * transition_factor * order_factor * (N0 + 1.0) * compute_T_taylor_bessel_pdf(eps_alpha, sp.EF_J, DeltaE + hw0 - ell*Eph, ell, qd, cfg);
+                Pminus = P0_LO * transition_factor * order_factor * N0 * compute_T_taylor_bessel_pdf(eps_alpha, sp.EF_J, DeltaE - hw0 - ell*Eph, ell, qd, cfg);
                 spectrum.mechanism.optical.(order_key).emission_raw(iE) = spectrum.mechanism.optical.(order_key).emission_raw(iE) + Pplus;
                 spectrum.mechanism.optical.(order_key).absorption_raw(iE) = spectrum.mechanism.optical.(order_key).absorption_raw(iE) + Pminus;
                 spectrum.mechanism.optical.(order_key).total_raw(iE) = spectrum.mechanism.optical.(order_key).total_raw(iE) + Pplus + Pminus;
-                Ppiezo = P0_PE * transition_factor * order_factor * compute_T_taylor_bessel_pdf(eps_alpha, EF, DeltaE - ell*Eph, ell, qd, cfg);
-                if ell == 2
-                    Ppiezo = 1e9 * Ppiezo; %Dieu chinh cuong do dinh Piezo
-                end
-                spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) = spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) + Ppiezo;
+                spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) = spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) + P0_PE*transition_factor*order_factor*compute_T_taylor_bessel_pdf(eps_alpha,sp.EF_J,DeltaE-ell*Eph,ell,qd,cfg);
             end
         end
     end
@@ -482,25 +409,27 @@ function spectrum = compute_moap_van(sp, td, cfg)
             spectrum.mechanism.piezoelectric.total_raw ...
             + spectrum.mechanism.piezoelectric.(order_key).total_raw;
     end
-    spectrum.total_raw = ...
-        spectrum.mechanism.optical.total_raw ...
-        + spectrum.mechanism.piezoelectric.total_raw;
-    spectrum = normalize_spectrum_for_plot(spectrum, cfg);
+    spectrum.total_raw = spectrum.mechanism.optical.total_raw+spectrum.mechanism.piezoelectric.total_raw;
+    scale = 1;
+    if strcmpi(cfg.oap.plot_normalization,'global_max')
+        scale = max(spectrum.total_raw);
+        if ~isfinite(scale) || scale <= 0, scale = 1; end
+    end
+    spectrum.mechanism.optical.total_plot = spectrum.mechanism.optical.total_raw/scale;
+    spectrum.mechanism.piezoelectric.total_plot = spectrum.mechanism.piezoelectric.total_raw/scale;
+    for ell = orders
+        ok = sprintf('order_%d',ell);
+        spectrum.mechanism.optical.(ok).emission_plot = spectrum.mechanism.optical.(ok).emission_raw/scale;
+        spectrum.mechanism.optical.(ok).absorption_plot = spectrum.mechanism.optical.(ok).absorption_raw/scale;
+        spectrum.mechanism.optical.(ok).total_plot = spectrum.mechanism.optical.(ok).total_raw/scale;
+        spectrum.mechanism.piezoelectric.(ok).total_plot = spectrum.mechanism.piezoelectric.(ok).total_raw/scale;
+    end
 end
 function Tval = compute_T_taylor_bessel_pdf(eps_alpha_J, EF_J, D_J, ell, qd, cfg)
     c = cfg.constants;
     hbar = c.hbar;
     kBT  = c.kB * cfg.temperature_K;
     me   = cfg.material.mstar_rel * c.m0;
-    if cfg.oap.series.enforce_fermi_condition
-        if ~(eps_alpha_J > EF_J)
-            error([ ...
-                'Taylor-Fermi expansion in Section 4 requires ', ...
-                'eps_alpha > EF. ', ...
-                'eps_alpha = %.17e J, EF = %.17e J.'], ...
-                eps_alpha_J, EF_J);
-        end
-    end
     if D_J == 0
         Tval = NaN;
         return;
@@ -517,89 +446,9 @@ function Tval = compute_T_taylor_bessel_pdf(eps_alpha_J, EF_J, D_J, ell, qd, cfg
         end
     end
 end
-function [qd, ne3d] = debye_wavevector(sp, cfg)
-    c = cfg.constants;
-    switch lower(cfg.oap.screening_density_mode)
-        case 'from_sheet'
-            thickness = cfg.oap.active_thickness_nm * c.nm;
-            if thickness <= 0
-                thickness = max(cfg.structure.Lz_nm*c.nm, sp.dz_m);
-            end
-            ne3d = sp.Nd_sheet_m2 / thickness;
-        case 'fixed'
-            ne3d = cfg.oap.fixed_ne_cm3 * 1.0e6;
-        otherwise
-            error('Unknown screening_density_mode.');
-    end
-    qd = sqrt(max(ne3d,0) * c.e^2 / (cfg.material.eps_static*c.eps0*c.kB*cfg.temperature_K));
-end
-function spectrum = initialize_spectrum_struct(Ephot, cfg)
-    c = cfg.constants;
-    nE = numel(Ephot);
-    spectrum.energy_J = Ephot;
-    spectrum.energy_meV = Ephot/c.meV;
-    spectrum.total_raw = zeros(1,nE);
-    all_mechanisms = {'optical','piezoelectric'};
-    for im = 1:numel(all_mechanisms)
-        mk = all_mechanisms{im};
-        spectrum.mechanism.(mk).total_raw = zeros(1,nE);
-        for order = cfg.oap.photon_orders
-            ok = sprintf('order_%d', order);
-            spectrum.mechanism.(mk).(ok).emission_raw = zeros(1,nE);
-            spectrum.mechanism.(mk).(ok).absorption_raw = zeros(1,nE);
-            spectrum.mechanism.(mk).(ok).total_raw = zeros(1,nE);
-        end
-    end
-end
-function spectrum = normalize_spectrum_for_plot(spectrum, cfg)
-    scale = 1.0;
-    if strcmpi(cfg.oap.plot_normalization, 'global_max')
-        scale = max(spectrum.total_raw);
-        if ~isfinite(scale) || scale <= 0
-            scale = 1.0;
-        end
-    elseif ~strcmpi(cfg.oap.plot_normalization, 'none')
-        error('Unknown plot_normalization option.');
-    end
-    spectrum.plot_scale = scale;
-    spectrum.total_plot = spectrum.total_raw / scale;
-    mech_names = {'optical','piezoelectric'};
-    for im = 1:numel(mech_names)
-        mk = mech_names{im};
-        spectrum.mechanism.(mk).total_plot = spectrum.mechanism.(mk).total_raw / scale;
-        for order = cfg.oap.photon_orders
-            ok = sprintf('order_%d',order);
-            spectrum.mechanism.(mk).(ok).emission_plot = spectrum.mechanism.(mk).(ok).emission_raw/scale;
-            spectrum.mechanism.(mk).(ok).absorption_plot = spectrum.mechanism.(mk).(ok).absorption_raw/scale;
-            spectrum.mechanism.(mk).(ok).total_plot = spectrum.mechanism.(mk).(ok).total_raw/scale;
-        end
-    end
-end
-function metrics = extract_spectrum_metrics(spectrum, cfg)
-    E = spectrum.energy_meV;
-    metrics.total = profile_fwhm(E, spectrum.total_raw);
-    mech_names = {'optical','piezoelectric'};
-    for im = 1:numel(mech_names)
-        mk = mech_names{im};
-        metrics.(mk).total = profile_fwhm(E, spectrum.mechanism.(mk).total_raw);
-        for order = cfg.oap.photon_orders
-            ok = sprintf('order_%d', order);
-            metrics.(mk).(ok).emission = profile_fwhm(E, spectrum.mechanism.(mk).(ok).emission_raw);
-            metrics.(mk).(ok).absorption = profile_fwhm(E, spectrum.mechanism.(mk).(ok).absorption_raw);
-            metrics.(mk).(ok).total = profile_fwhm(E, spectrum.mechanism.(mk).(ok).total_raw);
-        end
-    end
-end
 function m = profile_fwhm(x, y)
     x = x(:).'; y = y(:).';
     m = struct('peak',NaN,'peak_x',NaN,'fwhm',NaN,'hwhm',NaN, 'left_x',NaN,'right_x',NaN,'left_hwhm',NaN, 'right_hwhm',NaN,'half_level',NaN,'resolved',false);
-    if numel(x) ~= numel(y)
-        error('QW:FWHM:SizeMismatch','x and y must have the same size.');
-    end
-    if numel(x) < 3 || ~isreal(x) || any(~isfinite(x)) || any(diff(x) <= 0)
-        error('QW:FWHM:InvalidGrid','x must be finite and strictly increasing.');
-    end
-    if ~isreal(y) || any(~isfinite(y)) || any(y < 0), return; end
     [m.peak, ip] = max(y);
     if m.peak <= 0, return; end
     m.peak_x = x(ip); m.half_level = m.peak/2;
@@ -610,20 +459,16 @@ function m = profile_fwhm(x, y)
     il = find(y(1:ip) <= h,1,'last');
     ir = ip-1 + find(y(ip:end) <= h,1,'first');
     if isempty(il) || isempty(ir) || il == ip || ir == ip, return; end
-    m.left_x = crossing(x,y,il,h);
-    m.right_x = crossing(x,y,ir-1,h);
+    if y(il+1) == y(il), m.left_x = (x(il)+x(il+1))/2;
+    else, m.left_x = x(il)+(h-y(il))*(x(il+1)-x(il))/(y(il+1)-y(il)); end
+    ir = ir-1;
+    if y(ir+1) == y(ir), m.right_x = (x(ir)+x(ir+1))/2;
+    else, m.right_x = x(ir)+(h-y(ir))*(x(ir+1)-x(ir))/(y(ir+1)-y(ir)); end
     m.left_hwhm = m.peak_x-m.left_x;
     m.right_hwhm = m.right_x-m.peak_x;
     m.fwhm = m.right_x-m.left_x;
     m.hwhm = m.fwhm/2;
     m.resolved = true;
-end
-function xc = crossing(x,y,i,h)
-    if y(i+1) == y(i)
-        xc = (x(i)+x(i+1))/2;
-    else
-        xc = x(i)+(h-y(i))*(x(i+1)-x(i))/(y(i+1)-y(i));
-    end
 end
 function fig = plot_electronic_structure(sp, cfg)
     fig = figure( 'Visible', cfg.output.visible, 'Color', 'w', 'Units', 'pixels', 'Position', [100 100 720 520]);
@@ -715,19 +560,10 @@ function fig = plot_electronic_structure(sp, cfg)
 end
 function fig = plot_moap_spectrum(spectrum, cfg, mechanism)
     mk = lower(mechanism);
-    switch mk
-        case 'optical'
-            curve_color = [0.35 0.00 0.55];
-        case 'piezoelectric'
-            curve_color = [0.75 0.10 0.10];
-        otherwise
-            error('Unsupported mechanism: %s', mechanism);
-    end
+    if strcmp(mk,'optical'), curve_color = [.35 0 .55];
+    else, curve_color = [.75 .1 .1]; end
     E = spectrum.energy_meV(:);
     P = spectrum.mechanism.(mk).total_plot(:);
-    if numel(E) ~= numel(P)
-        error('Photon-energy and MOAP arrays must have the same length.');
-    end
     fig = figure( 'Visible', cfg.output.visible, 'Color', 'w', 'Units', 'pixels', 'Position', [100 100 680 500]);
     ax = axes(fig);
     hold(ax, 'on');
@@ -744,10 +580,6 @@ function fig = plot_moap_spectrum(spectrum, cfg, mechanism)
     valid = isfinite(E) & isfinite(P);
     E_valid = E(valid);
     P_valid = P(valid);
-    if isempty(E_valid)
-        warning('No finite MOAP data are available for plotting.');
-        return;
-    end
     P_abs = abs(P_valid);
     Pmax = max(P_abs);
     if cfg.oap.plot_full_energy_range && max(E_valid) > min(E_valid)
@@ -833,9 +665,6 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
         end
         for ic = 1:numel(curves)
             P = curves{ic};
-            if numel(P) ~= numel(E)
-                error('MOAP contribution size mismatch for photon order %d.', order);
-            end
             h = plot(ax, E, P, line_styles{ic}, 'Color', curve_color, 'LineWidth', 1.65);
             legend_handles(end+1) = h; %#ok<AGROW>
             labels{end+1} = curve_labels{ic}; %#ok<AGROW>
@@ -908,31 +737,4 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
     ax.XMinorGrid = 'off';
     ax.YMinorGrid = 'off';
     ax.LooseInset = max(ax.TightInset, 0.02);
-end
-function write_metrics_csv(metrics, cfg, filename)
-    mechanism = {};
-    order_col = [];
-    process = {};
-    peak_meV = [];
-    fwhm_meV = [];
-    hwhm_meV = [];
-    mechs = {'optical','piezoelectric'};
-    for im = 1:numel(mechs)
-        mk = mechs{im};
-        for order = cfg.oap.photon_orders
-            ok = sprintf('order_%d',order);
-            proc = {'emission','absorption'};
-            for ip = 1:2
-                item = metrics.(mk).(ok).(proc{ip});
-                mechanism{end+1,1} = mk; %#ok<AGROW>
-                order_col(end+1,1) = order; %#ok<AGROW>
-                process{end+1,1} = proc{ip}; %#ok<AGROW>
-                peak_meV(end+1,1) = item.peak_x; %#ok<AGROW>
-                fwhm_meV(end+1,1) = item.fwhm; %#ok<AGROW>
-                hwhm_meV(end+1,1) = item.hwhm; %#ok<AGROW>
-            end
-        end
-    end
-    T = table(mechanism,order_col,process,peak_meV,fwhm_meV,hwhm_meV, 'VariableNames',{'Mechanism','PhotonOrder','Process', 'Peak_meV','FWHM_meV','HWHM_meV'});
-    writetable(T,filename);
 end

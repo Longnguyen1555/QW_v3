@@ -1,9 +1,7 @@
-Mechanism,PhotonOrder,Process,Peak_meV,FWHM_meV,HWHM_meV
-optical,1,emission,72.91,NaN,NaN
-optical,1,absorption,10,NaN,NaN
-optical,2,emission,36.46,NaN,NaN
-optical,2,absorption,10,NaN,NaN
-piezoelectric,1,emission,NaN,NaN,NaN
-piezoelectric,1,absorption,NaN,NaN,NaN
-piezoelectric,2,emission,NaN,NaN,NaN
-piezoelectric,2,absorption,NaN,NaN,NaN
+SweepValue,Mechanism,PhotonOrder,Process,Resonance_meV,LeftFoot_meV,RightFoot_meV,Linewidth_meV,Resolved
+NaN,optical,1,emission,96.4580099146929,NaN,NaN,NaN,0
+NaN,optical,1,absorption,23.9580099146929,NaN,NaN,NaN,0
+NaN,piezoelectric,1,total,60.2080099146929,NaN,NaN,NaN,0
+NaN,optical,2,emission,48.2290049573465,NaN,NaN,NaN,0
+NaN,optical,2,absorption,11.9790049573465,NaN,NaN,NaN,0
+NaN,piezoelectric,2,total,30.1040049573465,NaN,NaN,NaN,0

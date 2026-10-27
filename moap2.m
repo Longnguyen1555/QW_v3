@@ -1,62 +1,8 @@
 function results = moap2(cfg)
-    clear; clc; close all;
-    if nargin == 0 || isempty(cfg)
-        cfg.run.task = 'single'; % single | sweep_spectra | linewidth_sweep | all_demo
-        cfg.run.verbose = true;
-        cfg.material.mstar_rel = 0.067;
-        cfg.material.eps_static = 13.18;
-        cfg.material.eps_high = 10.89;
-        cfg.material.LO_phonon_meV = 36.25;
-        cfg.material.piezo_kappa2 = 0.006;
-        cfg.structure.U0_meV = 228;
-        cfg.structure.Lz_nm = 15;
-        cfg.structure.manning_prefactor = 6;
-        cfg.structure.domain_nm = 60;
-        cfg.structure.domain_factor = 3;
-        cfg.structure.Nz = 1502;
-        cfg.structure.n_states = 6;
-        cfg.doping.Nd_sheet_cm2 = 1e11;
-        cfg.doping.width_nm = 2;
-        cfg.fields.B_T = 0;
-        cfg.fields.E_kVcm = 25;
-        cfg.fields.kx_inv_m = 0;
-        cfg.temperature_K = 100;
-        cfg.sp.max_outer = 100;
-        cfg.sp.mix = 0.5;
-        cfg.sp.tol_VH_relative = 1e-3;
-        cfg.sp.tol_EF_meV = 1e-3;
-        cfg.laser.E0_kVcm = 4.5;
-        cfg.laser.a0_nm = 7.5;
-        cfg.oap.transitions = [1 2];
-        cfg.oap.photon_orders = [1 2];
-        cfg.oap.mechanisms = {'optical','piezoelectric'};
-        cfg.oap.photon_energy_meV = 5:.001:150;
-        cfg.oap.qz_max_inv_nm = 2;
-        cfg.oap.Nqz = 101;
-        cfg.oap.plot_full_energy_range = true;
-        cfg.oap.series.s_max = 2;
-        cfg.oap.series.v_max = 2;
-        cfg.sweep.parameter = 'T_K';
-        cfg.sweep.values = [50 100 150];
-        cfg.linewidth.core_detuning_meV = 1e-4;
-        cfg.linewidth.foot_fraction = 1e-3;
-        cfg.linewidth.max_search_meV = 40;
-        cfg.linewidth.root_tolerance_meV = 1e-8;
-        cfg.output.directory = fullfile(fileparts(mfilename('fullpath')), 'results_van');
-        cfg.output.save_figures = true;
-        cfg.output.save_csv = true;
-        cfg.output.save_mat = true;
-        cfg.output.visible = 'on';
-        cfg.output.figure_format = 'png';
-        cfg.output.figure_dpi = 200;
-        cfg.constants.e = 1.602176634e-19;
-        cfg.constants.hbar = 1.054571817e-34;
-        cfg.constants.kB = 1.380649e-23;
-        cfg.constants.eps0 = 8.8541878128e-12;
-        cfg.constants.m0 = 9.1093837015e-31;
-        cfg.constants.meV = cfg.constants.e*1e-3;
-        cfg.constants.nm = 1e-9;
-    end
+% MOAP numerical model with local raw-profile FWHM measurement.
+    if nargin == 0 || isempty(cfg), cfg = struct(); end
+    % Recursive merge permits e.g. moap2(struct('run',struct('task','linewidth_sweep'))).
+    cfg = merge_moap2_config(default_moap2_config(),cfg);
     cfg = apply_moap2_defaults(cfg);
     if ~exist(cfg.output.directory, 'dir')
         mkdir(cfg.output.directory);
@@ -85,37 +31,93 @@ function results = moap2(cfg)
     fprintf('\n[MOAP] Completed successfully.\n[MOAP] Results folder: %s\n',cfg.output.directory);
 end
 
+function cfg = default_moap2_config()
+    cfg = struct();
+    cfg.run.task = 'all_demo'; % single | sweep_spectra | linewidth_sweep | all_demo
+    cfg.run.verbose = true;
+    cfg.material.mstar_rel = 0.067;
+    cfg.material.eps_static = 13.18;
+    cfg.material.eps_high = 10.89;
+    cfg.material.LO_phonon_meV = 36.25;
+    cfg.material.piezo_kappa2 = 0.006;
+    cfg.structure.U0_meV = 228;
+    cfg.structure.Lz_nm = 15;
+    cfg.structure.manning_prefactor = 6;
+    cfg.structure.domain_nm = 60;
+    cfg.structure.domain_factor = 3;
+    cfg.structure.Nz = 1502;
+    cfg.structure.n_states = 6;
+    cfg.doping.Nd_sheet_cm2 = 1e11;
+    cfg.doping.width_nm = 2;
+    cfg.fields.B_T = 0;
+    cfg.fields.E_kVcm = 25;
+    cfg.fields.kx_inv_m = 0;
+    cfg.temperature_K = 100;
+    cfg.sp.max_outer = 100;
+    cfg.sp.mix = 0.5;
+    cfg.sp.tol_VH_relative = 1e-3;
+    cfg.sp.tol_EF_meV = 1e-3;
+    cfg.laser.E0_kVcm = 4.5;
+    cfg.laser.a0_nm = 7.5;
+    cfg.oap.transitions = [1 2];
+    cfg.oap.photon_orders = [1 2];
+    cfg.oap.mechanisms = {'optical','piezoelectric'};
+    cfg.oap.photon_energy_meV = 5:0.001:150;
+    cfg.oap.qz_max_inv_nm = 2;
+    cfg.oap.Nqz = 101;
+    cfg.oap.plot_full_energy_range = true;
+    cfg.oap.series.s_max = 2;
+    cfg.oap.series.v_max = 2;
+    cfg.sweep.parameter = 'T_K';
+    cfg.sweep.values = 5:10:300;
+    cfg.output.directory = fullfile(fileparts(mfilename('fullpath')), 'results_van');
+    cfg.output.save_figures = true;
+    cfg.output.save_csv = true;
+    cfg.output.save_mat = true;
+    cfg.output.visible = 'on';
+    cfg.output.figure_format = 'png';
+    cfg.output.figure_dpi = 200;
+    cfg.output.show_experimental_fwhm = true;
+    cfg.constants.e = 1.602176634e-19;
+    cfg.constants.hbar = 1.054571817e-34;
+    cfg.constants.kB = 1.380649e-23;
+    cfg.constants.eps0 = 8.8541878128e-12;
+    cfg.constants.m0 = 9.1093837015e-31;
+    cfg.constants.meV = cfg.constants.e*1e-3;
+    cfg.constants.nm = 1e-9;
+end
+
+function out = merge_moap2_config(out, overrides)
+    assert(isstruct(overrides) && isscalar(overrides), ...
+        'Configuration overrides must be a scalar struct.');
+    keys = fieldnames(overrides);
+    for i = 1:numel(keys)
+        k = keys{i};
+        if isfield(out,k) && isstruct(out.(k)) && isstruct(overrides.(k))
+            out.(k) = merge_moap2_config(out.(k),overrides.(k));
+        else
+            out.(k) = overrides.(k);
+        end
+    end
+end
+
 function cfg = apply_moap2_defaults(cfg)
     if ~isfield(cfg,'run'), cfg.run = struct(); end
     if ~isfield(cfg.run,'task'), cfg.run.task = 'single'; end
     if ~isfield(cfg.run,'verbose'), cfg.run.verbose = true; end
+    if ~isfield(cfg,'oap'), cfg.oap = struct(); end
     if ~isfield(cfg.oap,'mechanisms')
         cfg.oap.mechanisms = {'optical','piezoelectric'};
     end
     if ~isfield(cfg,'sweep'), cfg.sweep = struct(); end
     if ~isfield(cfg.sweep,'parameter'), cfg.sweep.parameter = 'T_K'; end
     if ~isfield(cfg.sweep,'values'), cfg.sweep.values = cfg.temperature_K; end
-    if ~isfield(cfg,'linewidth'), cfg.linewidth = struct(); end
-    defaults = struct('core_detuning_meV',1e-4,'foot_fraction',1e-3, ...
-        'max_search_meV',40,'root_tolerance_meV',1e-8);
-    names = fieldnames(defaults);
-    for i = 1:numel(names)
-        name = names{i};
-        if ~isfield(cfg.linewidth,name)
-            cfg.linewidth.(name) = defaults.(name);
-        end
-    end
-    assert(cfg.linewidth.core_detuning_meV > 0, ...
-        'linewidth.core_detuning_meV must be positive.');
-    assert(cfg.linewidth.foot_fraction > 0 && ...
-        cfg.linewidth.foot_fraction < 1, ...
-        'linewidth.foot_fraction must lie strictly between zero and one.');
-    assert(cfg.linewidth.max_search_meV > cfg.linewidth.core_detuning_meV, ...
-        'linewidth.max_search_meV must exceed core_detuning_meV.');
 end
 
 function case_result = run_moap2_case(cfg, make_plots, save_outputs, compute_metrics)
     if nargin < 4, compute_metrics = true; end
+    assert(cfg.temperature_K > 0 && isfinite(cfg.temperature_K), ...
+        'Temperature must be strictly positive (use e.g. 1 K instead of 0 K).');
     if cfg.run.verbose
         fprintf('\n============================================================\n');
         fprintf('[MOAP] B = %.4g T, E = %.4g kV/cm, T = %.4g K\n', ...
@@ -130,7 +132,7 @@ function case_result = run_moap2_case(cfg, make_plots, save_outputs, compute_met
     transition_data = compute_transition_data(sp,cfg);
     spectrum = compute_moap(sp,transition_data,cfg);
     if compute_metrics
-        metrics = extract_foot_metrics(sp,transition_data,cfg);
+        metrics = extract_spectrum_metrics(spectrum,cfg);
     else
         metrics = struct();
     end
@@ -140,12 +142,9 @@ function case_result = run_moap2_case(cfg, make_plots, save_outputs, compute_met
     names = {};
     if make_plots
         figures = {plot_electronic_structure(sp,cfg), ...
-            plot_moap_spectrum(spectrum,cfg,'optical'), ...
-            plot_moap_spectrum(spectrum,cfg,'piezoelectric'), ...
             plot_moap_contributions(spectrum,cfg,'optical'), ...
             plot_moap_contributions(spectrum,cfg,'piezoelectric')};
-        names = {'structure','spectrum_optical','spectrum_piezoelectric', ...
-            'contributions_optical','contributions_piezoelectric'};
+        names = {'structure','contributions_optical','contributions_piezoelectric'};
     end
     if save_outputs
         save_moap2_single(case_result,figures,names,cfg);
@@ -169,7 +168,7 @@ function save_moap2_single(case_result, figures, names, cfg)
             spectrum.mechanism.piezoelectric.total_raw(:), ...
             'VariableNames',{'PhotonEnergy_meV','TotalRaw','OpticalRaw','PiezoelectricRaw'});
         writetable(T,fullfile(cfg.output.directory,'single_spectrum.csv'));
-        write_foot_metrics_csv(case_result.metrics,cfg, ...
+        write_fwhm_metrics_csv(case_result.metrics,cfg, ...
             fullfile(cfg.output.directory,'single_metrics.csv'),NaN);
     end
     save_moap2_figures(figures,names,'single',cfg);
@@ -425,11 +424,6 @@ function spectrum = compute_moap(sp, td, cfg)
                 spectrum.mechanism.optical.(order_key).absorption_raw(iE) = spectrum.mechanism.optical.(order_key).absorption_raw(iE) + Pminus;
                 spectrum.mechanism.optical.(order_key).total_raw(iE) = spectrum.mechanism.optical.(order_key).total_raw(iE) + Pplus + Pminus;
                 spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) = spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) + P0_PE*transition_factor*order_factor*compute_taylor_bessel(eps_alpha,sp.EF_J,DeltaE-ell*Eph,ell,qd,cfg);
-                em(iE) =  spectrum.mechanism.optical.(order_key).emission_raw(iE);
-                ab(iE) =  spectrum.mechanism.optical.(order_key).absorption_raw(iE);
-                pie(iE)  =  spectrum.mechanism.piezoelectric.(order_key).total_raw(iE);
-                bep(iE)  =  compute_taylor_bessel(eps_alpha, sp.EF_J, DeltaE + hw0 - ell*Eph, ell, qd, cfg);
-                bem(iE)  = compute_taylor_bessel(eps_alpha, sp.EF_J, DeltaE - hw0 - ell*Eph, ell, qd, cfg);
             end
         end
     end
@@ -467,146 +461,63 @@ function Tval = compute_taylor_bessel(eps_alpha_J, EF_J, D_J, ell, qd, cfg)
     Tval = 0.0;
     for s = ell:ell
         for v = 1:cfg.oap.series.v_max
-            LambdaKsum = besselk(s-ell, v*absD/(2.0*kBT), 0) + besselk(s-ell+1, v*absD/(2.0*kBT), 0) * 0;
-
+            LambdaKsum = besselk(s-ell, v*absD/(2.0*kBT), 0);
             LambdaJ = (hbar^2 * qd^2 / (2.0 * me)) * (hbar^2 * qd^2 / (2.0 * me * absD))^(s-ell) * LambdaKsum;
             Tval = Tval + (1)^(s+v-1) * (s+1) * exp(-v*(eps_alpha_J+D_J/2.0-EF_J)/kBT) * qd_power * LambdaJ;
         end
     end
 end
-function metrics = extract_foot_metrics(sp, td, cfg)
-%EXTRACT_FOOT_METRICS Near-base linewidth on the continuous Van profile.
-% The exact Van resonance is singular, so no sampled peak height is used.
-% A finite reference level is evaluated at a fixed detuning from the
-% analytical resonance center.  The two foot crossings are then obtained
-% with root finding.  Consequently the result does not depend on the
-% spacing or phase of cfg.oap.photon_energy_meV.
-    metrics = struct();
-    metrics.definition = 'foot_to_foot';
-    metrics.core_detuning_meV = cfg.linewidth.core_detuning_meV;
-    metrics.foot_fraction = cfg.linewidth.foot_fraction;
+function metrics = extract_spectrum_metrics(spectrum, cfg)
+% Peak position, FWHM and HWHM for each available component.
+    E = spectrum.energy_meV;
+    metrics.definition = 'profile_fwhm';
     for order = cfg.oap.photon_orders
         ok = sprintf('order_%d',order);
-        metrics.optical.(ok).emission = resonance_foot_metric( ...
-            sp,td,cfg,'optical',order,'emission');
-        metrics.optical.(ok).absorption = resonance_foot_metric( ...
-            sp,td,cfg,'optical',order,'absorption');
-        metrics.optical.(ok).total = empty_foot_metric(cfg);
-        metrics.piezoelectric.(ok).emission = empty_foot_metric(cfg);
-        metrics.piezoelectric.(ok).absorption = empty_foot_metric(cfg);
-        metrics.piezoelectric.(ok).total = resonance_foot_metric( ...
-            sp,td,cfg,'piezoelectric',order,'total');
+        optical = spectrum.mechanism.optical.(ok);
+        metrics.optical.(ok).emission = profile_fwhm(E,optical.emission_raw);
+        metrics.optical.(ok).absorption = profile_fwhm(E,optical.absorption_raw);
+        metrics.optical.(ok).total = profile_fwhm(E,optical.total_raw);
+        metrics.piezoelectric.(ok).total = profile_fwhm(E, ...
+            spectrum.mechanism.piezoelectric.(ok).total_raw);
     end
 end
 
-function m = resonance_foot_metric(sp, td, cfg, mechanism, order, process)
-    m = empty_foot_metric(cfg);
-    centers = resonance_centers_meV(td,cfg,mechanism,order,process);
-    d0 = cfg.linewidth.core_detuning_meV;
-    strengths = nan(size(centers));
-    for i = 1:numel(centers)
-        if centers(i) <= d0, continue; end
-        y_left = component_value(sp,td,cfg,mechanism,order,process,centers(i)-d0);
-        y_right = component_value(sp,td,cfg,mechanism,order,process,centers(i)+d0);
-        candidates = [y_left y_right];
-        candidates = candidates(isfinite(candidates) & candidates > 0);
-        if ~isempty(candidates), strengths(i) = max(candidates); end
+function m = profile_fwhm(x, y)
+% Width of a resolved peak at half its maximum.
+    x = x(:).'; y = y(:).';
+    m = struct('peak',NaN,'peak_x',NaN,'fwhm',NaN,'hwhm',NaN, ...
+        'left_x',NaN,'right_x',NaN,'left_hwhm',NaN, ...
+        'right_hwhm',NaN,'half_level',NaN,'resolved',false);
+    if numel(x) ~= numel(y)
+        error('QW:FWHM:SizeMismatch','x and y must have the same size.');
     end
-    [reference_peak,idx] = max(strengths);
-    if isempty(idx) || ~isfinite(reference_peak) || reference_peak <= 0
-        return;
+    if numel(x) < 3 || ~isreal(x) || any(~isfinite(x)) || any(diff(x) <= 0)
+        error('QW:FWHM:InvalidGrid','x must be finite and strictly increasing.');
     end
-    center = centers(idx);
-    foot_level = cfg.linewidth.foot_fraction*reference_peak;
-    left_delta = find_foot_delta(sp,td,cfg,mechanism,order,process, ...
-        center,-1,foot_level);
-    right_delta = find_foot_delta(sp,td,cfg,mechanism,order,process, ...
-        center,+1,foot_level);
-    m.reference_peak = reference_peak;
-    m.peak_x = center;
-    m.foot_level = foot_level;
-    if ~isfinite(left_delta) || ~isfinite(right_delta), return; end
-    m.left_x = center-left_delta;
-    m.right_x = center+right_delta;
-    m.left_width = left_delta;
-    m.right_width = right_delta;
-    m.width = left_delta+right_delta;
-    m.resolved = isfinite(m.width) && m.width > 0;
+    if ~isreal(y) || any(~isfinite(y)) || any(y < 0), return; end
+    [m.peak,ip] = max(y);
+    if m.peak <= 0, return; end
+    m.peak_x = x(ip); m.half_level = m.peak/2;
+    h = m.half_level;
+    if ip == 1 || ip == numel(y) || y(ip-1) < h || y(ip+1) < h, return; end
+    il = find(y(1:ip) <= h,1,'last');
+    ir = ip-1+find(y(ip:end) <= h,1,'first');
+    if isempty(il) || isempty(ir) || il == ip || ir == ip, return; end
+    m.left_x = crossing(x,y,il,h);
+    m.right_x = crossing(x,y,ir-1,h);
+    m.left_hwhm = m.peak_x-m.left_x;
+    m.right_hwhm = m.right_x-m.peak_x;
+    m.fwhm = m.right_x-m.left_x;
+    m.hwhm = m.fwhm/2;
+    m.resolved = true;
 end
 
-function centers = resonance_centers_meV(td, cfg, mechanism, order, process)
-    delta = [td.deltaE_J]/cfg.constants.meV;
-    if strcmp(mechanism,'optical')
-        hw0 = cfg.material.LO_phonon_meV;
-        if strcmp(process,'emission')
-            centers = (delta+hw0)/order;
-        else
-            centers = (delta-hw0)/order;
-        end
+function xc = crossing(x, y, i, h)
+    if y(i+1) == y(i)
+        xc = (x(i)+x(i+1))/2;
     else
-        centers = delta/order;
+        xc = x(i)+(h-y(i))*(x(i+1)-x(i))/(y(i+1)-y(i));
     end
-    centers = centers(isfinite(centers) & centers > 0);
-end
-
-function delta = find_foot_delta(sp,td,cfg,mechanism,order,process,center,side,level)
-    delta = NaN;
-    d0 = cfg.linewidth.core_detuning_meV;
-    dmax = cfg.linewidth.max_search_meV;
-    if side < 0, dmax = min(dmax,center*(1-1e-10)); end
-    if dmax <= d0, return; end
-    objective = @(d) foot_objective(d,sp,td,cfg,mechanism,order,process, ...
-        center,side,level);
-    a = d0;
-    fa = objective(a);
-    if ~isfinite(fa) || fa <= 0, return; end
-    % A modest geometric expansion finds the first outward crossing.  A
-    % factor of two can jump across the shallow foot of an asymmetric Van
-    % profile and land on its far tail after the profile has risen again.
-    expansion = 1.25;
-    b = min(expansion*a,dmax);
-    fb = objective(b);
-    while isfinite(fb) && fb > 0 && b < dmax
-        a = b;
-        b = min(expansion*b,dmax);
-        fb = objective(b);
-    end
-    if ~isfinite(fb) || fb > 0, return; end
-    options = optimset('TolX',cfg.linewidth.root_tolerance_meV,'Display','off');
-    delta = fzero(objective,[a b],options);
-end
-
-function value = foot_objective(delta,sp,td,cfg,mechanism,order,process,center,side,level)
-    energy = center+side*delta;
-    y = component_value(sp,td,cfg,mechanism,order,process,energy);
-    if ~isfinite(y) || y <= 0
-        % A sign change in the truncated series lies below any positive
-        % foot level.  Keep the objective finite so fzero can bracket the
-        % positive crossing immediately before that point.
-        value = -1e6;
-    else
-        value = log(y)-log(level);
-    end
-end
-
-function value = component_value(sp,td,cfg,mechanism,order,process,energy_meV)
-    cfg_eval = cfg;
-    cfg_eval.oap.photon_energy_meV = energy_meV;
-    s = compute_moap(sp,td,cfg_eval);
-    ok = sprintf('order_%d',order);
-    if strcmp(mechanism,'piezoelectric')
-        value = s.mechanism.piezoelectric.(ok).total_raw;
-    else
-        value = s.mechanism.optical.(ok).([process '_raw']);
-    end
-end
-
-function m = empty_foot_metric(cfg)
-    m = struct('reference_peak',NaN,'peak_x',NaN,'width',NaN, ...
-        'left_x',NaN,'right_x',NaN,'left_width',NaN,'right_width',NaN, ...
-        'foot_level',NaN,'core_detuning_meV', ...
-        cfg.linewidth.core_detuning_meV,'foot_fraction', ...
-        cfg.linewidth.foot_fraction,'resolved',false);
 end
 
 function sweep_result = run_moap2_sweep(cfg, need_metrics, make_spectra, make_linewidth)
@@ -627,7 +538,8 @@ function sweep_result = run_moap2_sweep(cfg, need_metrics, make_spectra, make_li
     sweep_result = struct('parameter',cfg.sweep.parameter,'values',values, ...
         'labels',{labels},'cases',{cases});
     if need_metrics
-        sweep_result.linewidth = collect_foot_widths(cases,values,cfg);
+        sweep_result.linewidth = collect_linewidths(cases,values,cfg);
+        sweep_result.linewidth.reference = experimental_fwhm_references();
     end
     mechanisms = cfg.oap.mechanisms;
     if ischar(mechanisms), mechanisms = {mechanisms}; end
@@ -679,7 +591,7 @@ function label = moap2_sweep_label(parameter, value)
     end
 end
 
-function linewidth = collect_foot_widths(cases, values, cfg)
+function linewidth = collect_linewidths(cases, values, cfg)
     linewidth.values = values(:).';
     for order = cfg.oap.photon_orders
         ok = sprintf('order_%d',order);
@@ -692,45 +604,29 @@ function linewidth = collect_foot_widths(cases, values, cfg)
             for process = {'emission','absorption'}
                 pk = process{1};
                 linewidth.optical.(ok).([pk '_width'])(i) = ...
-                    cases{i}.metrics.optical.(ok).(pk).width;
+                    cases{i}.metrics.optical.(ok).(pk).fwhm;
             end
             linewidth.piezoelectric.(ok).total_width(i) = ...
-                cases{i}.metrics.piezoelectric.(ok).total.width;
+                cases{i}.metrics.piezoelectric.(ok).total.fwhm;
         end
     end
 end
 
 function fig = plot_moap2_sweep_spectra(cases, labels, cfg, mechanism)
     idx = unique([1 floor((numel(cases)+1)/2) numel(cases)],'stable');
-    colors = [0.85 0 0.85; 0.05 0.15 0.65; 0.60 0.05 0];
-    markers = {'o','s','^'};
-    fig = figure('Visible',cfg.output.visible,'Color','w','Units','pixels', ...
-        'Position',[100 100 710 520]);
-    ax = axes(fig); hold(ax,'on'); handles = gobjects(0); shown_labels = {};
-    y_all = [];
+    colors = lines(numel(idx));
+    [fig,ax] = new_moap2_axes(cfg,[100 100 710 520]);
+    handles = gobjects(size(idx)); y_all = [];
     for j = 1:numel(idx)
         i = idx(j);
         E = cases{i}.spectrum.energy_meV(:);
         P = cases{i}.spectrum.mechanism.(mechanism).total_raw(:);
-        handles(end+1) = plot(ax,E,P,'-','Color',colors(j,:), ...
-            'LineWidth',1.65); %#ok<AGROW>
-        shown_labels{end+1} = labels{i}; %#ok<AGROW>
-        finite = find(isfinite(E) & isfinite(P));
-        if numel(finite) >= 2
-            pos = unique(round(linspace(1,numel(finite),min(24,numel(finite)))));
-            plot(ax,E(finite(pos)),P(finite(pos)),markers{j}, ...
-                'LineStyle','none','Color',colors(j,:), ...
-                'MarkerFaceColor',colors(j,:),'MarkerSize',3.1, ...
-                'HandleVisibility','off');
-        end
+        handles(j) = plot(ax,E,P,'Color',colors(j,:),'LineWidth',1.65);
         y_all = [y_all; P(isfinite(P))]; %#ok<AGROW>
     end
     xlabel(ax,'Photon energy $\hbar\Omega$ (meV)','Interpreter','latex','FontSize',13);
     ylabel(ax,'MOAP (arb. units)','Interpreter','latex','FontSize',13);
-    if ~isempty(handles)
-        legend(ax,handles,shown_labels,'Location','best','Interpreter','latex', ...
-            'FontSize',9.5,'Box','on');
-    end
+    legend(ax,handles,labels(idx),'Location','best','Interpreter','latex');
     if ~isempty(y_all) && max(y_all) > 0, ylim(ax,[0 1.055*max(y_all)]); end
     format_moap2_axes(ax);
     suppress_moap_intensity_exponent(ax);
@@ -740,9 +636,8 @@ function fig = plot_moap2_linewidth(linewidth, cfg, mechanism)
     x = linewidth.values(:);
     colors = [0 0.3 0.8; 0.85 0.1 0.1; 0.7 0 0.65];
     markers = {'o','s','^'};
-    fig = figure('Visible',cfg.output.visible,'Color','w','Units','pixels', ...
-        'Position',[100 100 700 510]);
-    ax = axes(fig); hold(ax,'on'); handles = gobjects(0); labels = {}; y_all = [];
+    [fig,ax] = new_moap2_axes(cfg,[100 100 700 510]);
+    handles = gobjects(0); labels = {}; y_all = [];
     for j = 1:numel(cfg.oap.photon_orders)
         order = cfg.oap.photon_orders(j); ok = sprintf('order_%d',order);
         color = colors(mod(j-1,size(colors,1))+1,:);
@@ -767,20 +662,49 @@ function fig = plot_moap2_linewidth(linewidth, cfg, mechanism)
             y_all = [y_all; y(valid)]; %#ok<AGROW>
         end
     end
+    show_refs = cfg.output.show_experimental_fwhm && ...
+        strcmp(mechanism,'optical') && strcmpi(cfg.sweep.parameter,'T_K');
+    if show_refs
+        refs = linewidth.reference;
+        handles(end+1) = plot(ax,refs.unuma.T_K,refs.unuma.W_meV,':*', ...
+            'Color',[0 .48 .1],'LineWidth',1.2);
+        handles(end+1) = plot(ax,refs.von_allmen.T_K,refs.von_allmen.W_meV,':*', ...
+            'Color',[.9 .38 .05],'LineWidth',1.2);
+        labels(end+1:end+2) = {'T. Unuma et al. [54,55] (digitized)', ...
+            'P. Von Allmen et al. [56] (digitized)'};
+        y_all = [y_all; refs.unuma.W_meV(:); refs.von_allmen.W_meV(:)];
+    end
     xlabel(ax,moap2_sweep_axis_label(cfg.sweep.parameter), ...
         'Interpreter','latex','FontSize',13);
-    ylabel(ax,'Foot-to-foot linewidth (meV)','Interpreter','latex','FontSize',13);
+    ylabel(ax,'FWHM (meV)','Interpreter','latex','FontSize',13);
     if ~isempty(handles)
         legend(ax,handles,labels,'Location','best','Interpreter','latex', ...
             'FontSize',9.5,'Box','on');
     end
     if ~isempty(y_all) && max(y_all) > 0, ylim(ax,[0 1.06*max(y_all)]); end
-    if isscalar(x)
+    if show_refs
+        xlim(ax,[min([x;refs.unuma.T_K(:);refs.von_allmen.T_K(:)]), ...
+            max([x;refs.unuma.T_K(:);refs.von_allmen.T_K(:)])]);
+    elseif isscalar(x)
         dx = max(0.05*abs(x),1); xlim(ax,[x-dx x+dx]);
     elseif numel(x) > 1
         xlim(ax,[min(x) max(x)]);
     end
     format_moap2_axes(ax);
+end
+
+function refs = experimental_fwhm_references()
+    refs.unuma.T_K = [5 30 75 125 167 217 257 296];
+    refs.unuma.W_meV = [11.03 11.03 11.43 11.93 13.12 13.67 14.13 14.83];
+    refs.von_allmen.T_K = [5 15 30 40 50 60 75 97 116 135 155 174 194 213 233 252 272 292];
+    refs.von_allmen.W_meV = [10.2 10.2 10.2 10.1 10.1 10.1 10.21 ...
+        10.35 10.71 10.88 11.40 11.93 12.70 14.36 16.04 15.65 16.98 18.59];
+end
+
+function [fig,ax] = new_moap2_axes(cfg, position)
+    fig = figure('Visible',cfg.output.visible,'Color','w', ...
+        'Units','pixels','Position',position);
+    ax = axes(fig); hold(ax,'on');
 end
 
 function label = moap2_sweep_axis_label(parameter)
@@ -841,23 +765,36 @@ function save_moap2_linewidth(sweep_result, figures, names, cfg)
     if cfg.output.save_csv
         tables = cell(1,numel(sweep_result.cases));
         for i = 1:numel(sweep_result.cases)
-            tables{i} = foot_metrics_table(sweep_result.cases{i}.metrics, ...
+            tables{i} = linewidth_metrics_table(sweep_result.cases{i}.metrics, ...
                 cfg,sweep_result.values(i));
         end
         writetable(vertcat(tables{:}), ...
             fullfile(cfg.output.directory,'linewidth_sweep.csv'));
+        if strcmpi(cfg.sweep.parameter,'T_K')
+            export_experimental_fwhm_csv(sweep_result.linewidth.reference, ...
+                fullfile(cfg.output.directory,'experimental_fwhm_digitized.csv'));
+        end
     end
     save_moap2_figures(figures,names,'',cfg);
 end
 
-function write_foot_metrics_csv(metrics, cfg, filename, sweep_value)
-    writetable(foot_metrics_table(metrics,cfg,sweep_value),filename);
+function export_experimental_fwhm_csv(refs, filename)
+    temperature = [refs.unuma.T_K(:);refs.von_allmen.T_K(:)];
+    fwhm = [refs.unuma.W_meV(:);refs.von_allmen.W_meV(:)];
+    source = [repmat({'T. Unuma et al. [54,55]'},numel(refs.unuma.T_K),1); ...
+        repmat({'P. Von Allmen et al. [56]'},numel(refs.von_allmen.T_K),1)];
+    writetable(table(source,temperature,fwhm,'VariableNames', ...
+        {'ExperimentalReference','Temperature_K','FWHM_meV'}),filename);
 end
 
-function T = foot_metrics_table(metrics, cfg, sweep_value)
+function write_fwhm_metrics_csv(metrics, cfg, filename, sweep_value)
+    writetable(linewidth_metrics_table(metrics,cfg,sweep_value),filename);
+end
+
+function T = linewidth_metrics_table(metrics, cfg, sweep_value)
     parameter_value = []; mechanism = {}; photon_order = [];
-    process = {}; resonance = []; left_foot = []; right_foot = [];
-    linewidth = []; resolved = [];
+    process = {}; peak = []; left_x = []; right_x = [];
+    fwhm = []; hwhm = []; resolved = [];
     for order = cfg.oap.photon_orders
         ok = sprintf('order_%d',order);
         entries = {{'optical','emission',metrics.optical.(ok).emission}, ...
@@ -869,17 +806,19 @@ function T = foot_metrics_table(metrics, cfg, sweep_value)
             mechanism{end+1,1} = entries{i}{1}; %#ok<AGROW>
             photon_order(end+1,1) = order; %#ok<AGROW>
             process{end+1,1} = entries{i}{2}; %#ok<AGROW>
-            resonance(end+1,1) = item.peak_x; %#ok<AGROW>
-            left_foot(end+1,1) = item.left_x; %#ok<AGROW>
-            right_foot(end+1,1) = item.right_x; %#ok<AGROW>
-            linewidth(end+1,1) = item.width; %#ok<AGROW>
+            peak(end+1,1) = item.peak_x; %#ok<AGROW>
+            left_x(end+1,1) = item.left_x; %#ok<AGROW>
+            right_x(end+1,1) = item.right_x; %#ok<AGROW>
+            fwhm(end+1,1) = item.fwhm; %#ok<AGROW>
+            hwhm(end+1,1) = item.hwhm; %#ok<AGROW>
             resolved(end+1,1) = item.resolved; %#ok<AGROW>
         end
     end
-    T = table(parameter_value,mechanism,photon_order,process,resonance, ...
-        left_foot,right_foot,linewidth,logical(resolved), ...
+    T = table(parameter_value,mechanism,photon_order,process,peak, ...
+        left_x,right_x,fwhm,hwhm,logical(resolved), ...
         'VariableNames',{'SweepValue','Mechanism','PhotonOrder','Process', ...
-        'Resonance_meV','LeftFoot_meV','RightFoot_meV','Linewidth_meV','Resolved'});
+        'Peak_meV','LeftHalfMaximum_meV','RightHalfMaximum_meV', ...
+        'FWHM_meV','HWHM_meV','Resolved'});
 end
 
 function save_moap2_figures(figures, names, prefix, cfg)
@@ -911,7 +850,6 @@ function fig = plot_electronic_structure(sp, cfg)
     potential_color = [0.000 0.300 0.800];
     state_colors = [ 0.850 0.100 0.100; 0.100 0.550 0.100; 0.050 0.050 0.050; 0.750 0.000 0.650 ];
     state_styles = { '-', '--', '-.', ':' };
-    state_markers = { 'o', 's', '^', 'd' };
     if n_states_plot >= 2
         dE = diff(sort(Eplot));
         dE = dE(isfinite(dE) & dE > 1.0e-9);
@@ -927,10 +865,7 @@ function fig = plot_electronic_structure(sp, cfg)
     if ~isfinite(density_scale) || density_scale <= 0
         density_scale = 10.0;
     end
-    n_marker = min(24, numel(z));
-    marker_idx = unique(round(linspace(1, numel(z), n_marker)));
     hPotential = plot( ax, z, Ueff, '-', 'Color', potential_color, 'LineWidth', 2.0, 'DisplayName', '$U_{\mathrm{eff}}(z)$');
-    plot( ax, z(marker_idx), Ueff(marker_idx), 'o', 'LineStyle', 'none', 'Color', potential_color, 'MarkerSize', 3.4, 'MarkerFaceColor', 'w', 'HandleVisibility', 'off');
     hState = gobjects(n_states_plot, 1);
     y_state_max = zeros(n_states_plot, 1);
     y_state_min = zeros(n_states_plot, 1);
@@ -948,7 +883,6 @@ function fig = plot_electronic_structure(sp, cfg)
         y_state_max(i) = max(y_state);
         yline( ax, E(i), ':', 'Color', state_colors(i, :), 'LineWidth', 0.75, 'HandleVisibility', 'off');
         hState(i) = plot( ax, z, y_state, state_styles{i}, 'Color', state_colors(i, :), 'LineWidth', 1.55, 'DisplayName', sprintf('$n=%d$', n));
-        plot( ax, z(marker_idx), y_state(marker_idx), state_markers{i}, 'LineStyle', 'none', 'Color', state_colors(i, :), 'MarkerSize', 3.3, 'MarkerFaceColor', 'w', 'HandleVisibility', 'off');
     end
     hEF = gobjects(0);
     if isfield(sp, 'EF_meV') && isscalar(sp.EF_meV) && isfinite(sp.EF_meV)
@@ -978,81 +912,8 @@ function fig = plot_electronic_structure(sp, cfg)
     end
     lgd = legend( ax, legend_handles, 'Location', 'best', 'Interpreter', 'latex', 'FontSize', 10, 'Box', 'on');
     lgd.ItemTokenSize = [24 12];
-    set( ax, 'Box', 'on', 'Layer', 'top', 'LineWidth', 0.9, 'FontName', 'Times New Roman', 'FontSize', 11, 'TickDir', 'in', 'TickLength', [0.018 0.018], 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickLabelInterpreter', 'latex');
-    grid(ax, 'on');
+    format_moap2_axes(ax);
     ax.GridLineStyle = ':';
-    ax.GridAlpha = 0.22;
-    ax.XMinorGrid = 'off';
-    ax.YMinorGrid = 'off';
-    ax.LooseInset = max(ax.TightInset, 0.02);
-end
-function fig = plot_moap_spectrum(spectrum, cfg, mechanism)
-    mk = lower(mechanism);
-    if strcmp(mk,'optical'), curve_color = [.35 0 .55];
-    else, curve_color = [.75 .1 .1]; end
-    E = spectrum.energy_meV(:);
-    P = spectrum.mechanism.(mk).total_plot(:);
-    fig = figure( 'Visible', cfg.output.visible, 'Color', 'w', 'Units', 'pixels', 'Position', [100 100 680 500]);
-    ax = axes(fig);
-    hold(ax, 'on');
-    plot( ax, E, P, '-', 'Color', curve_color, 'LineWidth', 1.75);
-    n_marker = min(36, numel(E));
-    marker_idx = unique( round(linspace(1, numel(E), n_marker)));
-    plot( ax, E(marker_idx), P(marker_idx), 'o', 'LineStyle', 'none', 'Color', curve_color, 'MarkerFaceColor', curve_color, 'MarkerEdgeColor', curve_color, 'MarkerSize', 3.0, 'HandleVisibility', 'off');
-    xlabel( ax, 'Photon energy $\hbar\Omega$ (meV)', 'Interpreter', 'latex', 'FontSize', 13);
-    ylabel( ax, 'MOAP (arb. units)', 'Interpreter', 'latex', 'FontSize', 13);
-    valid = isfinite(E) & isfinite(P);
-    E_valid = E(valid);
-    P_valid = P(valid);
-    P_abs = abs(P_valid);
-    Pmax = max(P_abs);
-    if cfg.oap.plot_full_energy_range && max(E_valid) > min(E_valid)
-        xlim(ax, [min(E_valid) max(E_valid)]);
-    elseif isfinite(Pmax) && Pmax > 0
-        active_threshold = 1.0e-5 * Pmax;
-        active = find(P_abs >= active_threshold);
-        if numel(active) >= 2
-            xmin_active = E_valid(active(1));
-            xmax_active = E_valid(active(end));
-            active_width = xmax_active - xmin_active;
-            if active_width > 0
-                xpad = 0.035 * active_width;
-            else
-                xpad = 0.02 * (max(E_valid) - min(E_valid));
-            end
-            xmin = max( min(E_valid), xmin_active - xpad);
-            xmax = min( max(E_valid), xmax_active + xpad);
-            if xmax > xmin
-                xlim(ax, [xmin xmax]);
-            else
-                xlim(ax, [min(E_valid) max(E_valid)]);
-            end
-        else
-            xlim(ax, [min(E_valid) max(E_valid)]);
-        end
-    else
-        xlim(ax, [min(E_valid) max(E_valid)]);
-    end
-    ymax = max(P_valid);
-    ymin = min(P_valid);
-    if isfinite(ymax) && ymax > 0
-        negative_tolerance = 1.0e-10 * ymax;
-        if ymin >= -negative_tolerance
-            ylim(ax, [0, 1.055*ymax]);
-        else
-            yrange = ymax - ymin;
-            ypad = 0.04 * yrange;
-            ylim(ax, [ ymin - ypad, ymax + ypad ]);
-        end
-    end
-    set( ax, 'Box', 'on', 'Layer', 'top', 'LineWidth', 0.9, 'FontName', 'Times New Roman', 'FontSize', 11, 'TickDir', 'in', 'TickLength', [0.018 0.018], 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickLabelInterpreter', 'latex');
-    grid(ax, 'on');
-    ax.GridLineStyle = '--';
-    ax.GridAlpha = 0.22;
-    ax.XMinorGrid = 'off';
-    ax.YMinorGrid = 'off';
-    suppress_moap_intensity_exponent(ax);
-    ax.LooseInset = max(ax.TightInset, 0.02);
 end
 function fig = plot_moap_contributions(spectrum, cfg, mechanism)
     mk = lower(mechanism);
@@ -1062,7 +923,6 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
     ax = axes(fig);
     hold(ax, 'on');
     order_colors = [ 0.000 0.300 0.800; 0.850 0.100 0.100; 0.100 0.550 0.100; 0.650 0.100 0.650; 0.100 0.600 0.650 ];
-    order_markers = { 'o', 's', '^', 'd', 'v' };
     x_active_all = [];
     if cfg.oap.plot_full_energy_range
         x_active_all = E(isfinite(E));
@@ -1074,19 +934,15 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
         order = photon_orders(io);
         ok = sprintf('order_%d', order);
         color_idx = mod(io - 1, size(order_colors, 1)) + 1;
-        marker_idx_style = mod(io - 1, numel(order_markers)) + 1;
         curve_color = order_colors(color_idx, :);
-        curve_marker = order_markers{marker_idx_style};
         if strcmpi(mk, 'piezoelectric')
             curves = {spectrum.mechanism.(mk).(ok).total_plot(:)};
             line_styles = {'-'};
             curve_labels = {sprintf('$\\ell=%d$', order)};
-            marker_faces = {curve_color};
         else
             curves = {spectrum.mechanism.(mk).(ok).emission_plot(:), spectrum.mechanism.(mk).(ok).absorption_plot(:)};
             line_styles = {'-', '--'};
             curve_labels = {sprintf('$\\ell=%d$ emission', order), sprintf('$\\ell=%d$ absorption', order)};
-            marker_faces = {curve_color, 'w'};
         end
         for ic = 1:numel(curves)
             P = curves{ic};
@@ -1096,12 +952,7 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
             P_abs = abs(P);
             Pmax = max(P_abs(isfinite(P_abs)));
             if ~isempty(Pmax) && isfinite(Pmax) && Pmax > 0
-                idx_active = find(isfinite(P) & P_abs >= 1.0e-4*Pmax);
-                if numel(idx_active) >= 2
-                    marker_pos = unique(round(linspace(1, numel(idx_active), min(18, numel(idx_active)))));
-                    marker_idx = idx_active(marker_pos);
-                    plot(ax, E(marker_idx), P(marker_idx), curve_marker, 'LineStyle', 'none', 'Color', curve_color, 'MarkerEdgeColor', curve_color, 'MarkerFaceColor', marker_faces{ic}, 'MarkerSize', 3.4, 'HandleVisibility', 'off');
-                end
+                idx_active = isfinite(P) & P_abs >= 1.0e-4*Pmax;
                 x_active_all = [x_active_all; E(idx_active)]; %#ok<AGROW>
             end
             y_all = [y_all; P(isfinite(P))]; %#ok<AGROW>
@@ -1153,12 +1004,6 @@ function fig = plot_moap_contributions(spectrum, cfg, mechanism)
         end
         lgd.ItemTokenSize = [22 10];
     end
-    set( ax, 'Box', 'on', 'Layer', 'top', 'LineWidth', 0.9, 'FontName', 'Times New Roman', 'FontSize', 11, 'TickDir', 'in', 'TickLength', [0.018 0.018], 'XMinorTick', 'on', 'YMinorTick', 'on', 'TickLabelInterpreter', 'latex');
-    grid(ax, 'on');
-    ax.GridLineStyle = '--';
-    ax.GridAlpha = 0.22;
-    ax.XMinorGrid = 'off';
-    ax.YMinorGrid = 'off';
+    format_moap2_axes(ax);
     suppress_moap_intensity_exponent(ax);
-    ax.LooseInset = max(ax.TightInset, 0.02);
 end

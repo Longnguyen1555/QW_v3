@@ -49,7 +49,7 @@ function cfg = default_moap2_config()
     cfg.structure.n_states = 6;
     cfg.doping.Nd_sheet_cm2 = 1e11;
     cfg.doping.width_nm = 2;
-    cfg.fields.B_T = 0;
+    cfg.fields.B_T = 5;
     cfg.fields.E_kVcm = 25;
     cfg.fields.kx_inv_m = 0;
     cfg.temperature_K = 100;
@@ -62,14 +62,14 @@ function cfg = default_moap2_config()
     cfg.oap.transitions = [1 2];
     cfg.oap.photon_orders = [1 2];
     cfg.oap.mechanisms = {'optical','piezoelectric'};
-    cfg.oap.photon_energy_meV = 5:0.001:150;
+    cfg.oap.photon_energy_meV = 5:0.01:150;
     cfg.oap.qz_max_inv_nm = 2;
     cfg.oap.Nqz = 101;
     cfg.oap.plot_full_energy_range = true;
     cfg.oap.series.s_max = 2;
     cfg.oap.series.v_max = 2;
     cfg.sweep.parameter = 'T_K';
-    cfg.sweep.values = 5:10:300;
+    cfg.sweep.values = 5:50:300;
     cfg.output.directory = fullfile(fileparts(mfilename('fullpath')), 'results_van');
     cfg.output.save_figures = true;
     cfg.output.save_csv = true;
@@ -115,7 +115,7 @@ function cfg = apply_moap2_defaults(cfg)
 end
 
 function case_result = run_moap2_case(cfg, make_plots, save_outputs, compute_metrics)
-    if nargin < 4, compute_metrics = true; end
+    if nargin < 4,compute_metrics = true; end
     assert(cfg.temperature_K > 0 && isfinite(cfg.temperature_K), ...
         'Temperature must be strictly positive (use e.g. 1 K instead of 0 K).');
     if cfg.run.verbose
@@ -424,6 +424,7 @@ function spectrum = compute_moap(sp, td, cfg)
                 spectrum.mechanism.optical.(order_key).absorption_raw(iE) = spectrum.mechanism.optical.(order_key).absorption_raw(iE) + Pminus;
                 spectrum.mechanism.optical.(order_key).total_raw(iE) = spectrum.mechanism.optical.(order_key).total_raw(iE) + Pplus + Pminus;
                 spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) = spectrum.mechanism.piezoelectric.(order_key).total_raw(iE) + P0_PE*transition_factor*order_factor*compute_taylor_bessel(eps_alpha,sp.EF_J,DeltaE-ell*Eph,ell,qd,cfg);
+                peak(iE) = spectrum.mechanism.optical.(order_key).emission_raw(iE);
             end
         end
     end
@@ -485,9 +486,11 @@ end
 function m = profile_fwhm(x, y)
 % Width of a resolved peak at half its maximum.
     x = x(:).'; y = y(:).';
-    m = struct('peak',NaN,'peak_x',NaN,'fwhm',NaN,'hwhm',NaN, ...
-        'left_x',NaN,'right_x',NaN,'left_hwhm',NaN, ...
-        'right_hwhm',NaN,'half_level',NaN,'resolved',false);
+    % Keep resolved=false as the diagnostic flag, but report zero linewidth
+    % when the profile does not contain a resolvable peak.
+    m = struct('peak',NaN,'peak_x',NaN,'fwhm',0,'hwhm',0, ...
+        'left_x',NaN,'right_x',NaN,'left_hwhm',0, ...
+        'right_hwhm',0,'half_level',NaN,'resolved',false);
     if numel(x) ~= numel(y)
         error('QW:FWHM:SizeMismatch','x and y must have the same size.');
     end
@@ -495,6 +498,7 @@ function m = profile_fwhm(x, y)
         error('QW:FWHM:InvalidGrid','x must be finite and strictly increasing.');
     end
     if ~isreal(y) || any(~isfinite(y)) || any(y < 0), return; end
+
     [m.peak,ip] = max(y);
     if m.peak <= 0, return; end
     m.peak_x = x(ip); m.half_level = m.peak/2;
@@ -503,8 +507,8 @@ function m = profile_fwhm(x, y)
     il = find(y(1:ip) <= h,1,'last');
     ir = ip-1+find(y(ip:end) <= h,1,'first');
     if isempty(il) || isempty(ir) || il == ip || ir == ip, return; end
-    m.left_x = crossing(x,y,il,h);
-    m.right_x = crossing(x,y,ir-1,h);
+    m.left_x = x(il);%crossing(x,y,il,h);
+    m.right_x = x(ir);%crossing(x,y,ir-1,h);
     m.left_hwhm = m.peak_x-m.left_x;
     m.right_hwhm = m.right_x-m.peak_x;
     m.fwhm = m.right_x-m.left_x;
